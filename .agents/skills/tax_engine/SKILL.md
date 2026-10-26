@@ -114,7 +114,7 @@ All tests are co-located `*.test.ts` files (`bun:test`). Run them with `bun test
 ```bash
 bun test             # bun:test
 bun run typecheck    # tsc --noEmit
-bun run build        # tsup, emits dist/ (esm + cjs + d.ts)
+bun run build        # tsdown, emits dist/ (esm + cjs + d.ts)
 ```
 
 ## 10. Pitfalls

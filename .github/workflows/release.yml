@@ -20,13 +20,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.14
-      - uses: actions/setup-node@v4
+          bun-version: 1.4.4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: lts/*
           registry-url: https://registry.npmjs.org
 
       - name: Is this version already on npm?
