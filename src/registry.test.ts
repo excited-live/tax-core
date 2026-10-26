@@ -1,5 +1,5 @@
 import type { TaxCountry } from "./types"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it } from "bun:test"
 import {
 	availableTaxSystems,
 	getTaxSystem,

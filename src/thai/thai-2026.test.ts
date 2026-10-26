@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "bun:test"
 import type { TaxInput } from "../types"
 import { thai2026System } from "./thai-2026"
 
@@ -653,7 +653,7 @@ describe("Thai 2026 Section 48(2) Minimum Alternative Tax", () => {
 		)
 		expect(res.section48Tax).toBe(10_000)
 		expect(res.taxLiability).toBeGreaterThan(10_000)
-		expect(res.taxLiability).toBe(res.progressiveTax)
+		expect(res.taxLiability).toBe(res.progressiveTax!)
 		expect(res.warnings.some((w) => w.includes("Section 48(2) minimum tax applied"))).toBe(false)
 	})
 })

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "bun:test"
 import type { TaxInput } from "../types"
 import { us2026System } from "./us-2026"
 
@@ -43,7 +43,7 @@ describe("us2026System (PLACEHOLDER)", () => {
 		// config deep-freeze, this is the SAME frozen instance as
 		// options.bracketsByStatus.single (compute() reads that shared array).
 		expect(us2026System.config.brackets).toStrictEqual(
-			us2026System.config.options.bracketsByStatus.single,
+			us2026System.config.options.bracketsByStatus.single!,
 		)
 		expect(us2026System.config.options.filingStatuses).toHaveLength(4)
 	})

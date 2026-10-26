@@ -21,7 +21,7 @@
  * taxpayer, over-deducting for multiple employment lines. The
  * `multiline_employment` tests are the regression guard for the fix.
  */
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "bun:test"
 import type { TaxInput } from "../types"
 import { thai2026System } from "./thai-2026"
 

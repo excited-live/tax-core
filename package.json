@@ -1,7 +1,13 @@
 {
 	"name": "@excited-live/tax",
-	"version": "0.0.1",
-	"description": "Tax calculation utilities",
+	"version": "0.1.0",
+	"description": "Pure, multi-jurisdiction individual income tax engine (TH 2026, US placeholder)",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/excited-live/tax-core.git"
+	},
+	"packageManager": "bun@1.3.14",
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
@@ -15,15 +21,19 @@
 	"files": [
 		"dist"
 	],
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	},
 	"scripts": {
 		"build": "tsup",
-		"test": "vitest run",
-		"typecheck": "tsc --noEmit"
+		"test": "bun test",
+		"typecheck": "tsc --noEmit",
+		"check": "bun run typecheck && bun test && bun run build"
 	},
 	"devDependencies": {
-		"@vitest/coverage-v8": "catalog:",
-		"tsup": "catalog:",
-		"typescript": "catalog:",
-		"vitest": "catalog:"
+		"@types/bun": "^1.3.0",
+		"tsup": "^8.5.0",
+		"typescript": "^5.8.3"
 	}
 }

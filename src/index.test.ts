@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "bun:test"
 import * as taxModule from "./index"
 
 describe("tax module index re-exports", () => {

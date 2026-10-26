@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it } from "bun:test"
 import type { TaxInput } from "./types"
 import { getTaxSystem } from "./registry"
 import { deepFreeze } from "./deep-freeze"
