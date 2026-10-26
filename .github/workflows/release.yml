@@ -1,12 +1,26 @@
 name: Release
 
-# Publishes to npm whenever main carries a package.json version that is not on
-# npm yet. To release: bump "version" in a PR, merge it. Nothing else.
+# Every push to main publishes an alpha (npm dist-tag "alpha"). Running this
+# workflow by hand on main publishes the stable version (dist-tag "latest"),
+# tags vX.Y.Z and creates a GitHub release. Versions are computed by
+# scripts/version.ts from git tags and commit messages; package.json "version"
+# is never edited by hand.
 on:
   push:
     branches: [main]
-    paths: [package.json]
+    paths-ignore:
+      - "**/*.md"
+      - ".agents/**"
+      - ".claude/**"
+      - ".github/**"
+      - ".git-blame-ignore-revs"
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump. auto reads commit messages since the last release."
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
 
 concurrency:
   group: release
@@ -18,9 +32,16 @@ permissions:
 
 jobs:
   publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      CHANNEL: ${{ github.event_name == 'workflow_dispatch' && 'stable' || 'alpha' }}
+      DIST_TAG: ${{ github.event_name == 'workflow_dispatch' && 'latest' || 'alpha' }}
+      BUMP: ${{ inputs.bump || 'auto' }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # tags and commit messages drive the version
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
@@ -29,32 +50,24 @@ jobs:
           node-version: lts/*
           registry-url: https://registry.npmjs.org
 
-      - name: Is this version already on npm?
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+
+      - name: Compute version
         id: version
         run: |
-          NAME=$(node -p "require('./package.json').name")
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=$(bun scripts/version.ts --channel "$CHANNEL" --bump "$BUMP")
+          echo "Publishing $VERSION as $DIST_TAG"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
-            echo "$NAME@$VERSION is already published, nothing to do"
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - if: steps.version.outputs.publish == 'true'
-        run: bun install --frozen-lockfile
-      - if: steps.version.outputs.publish == 'true'
-        run: bun run check
+          npm version "$VERSION" --no-git-tag-version
 
       - name: Publish to npm
-        if: steps.version.outputs.publish == 'true'
-        run: npm publish
+        run: npm publish --tag "$DIST_TAG"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Tag and GitHub release
-        if: steps.version.outputs.publish == 'true'
+        if: env.CHANNEL == 'stable'
         run: gh release create "v${{ steps.version.outputs.version }}" --target "$GITHUB_SHA" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}

@@ -57,11 +57,30 @@ bun run check       # lint + typecheck + test + build, what CI and release run
 
 ## Releasing
 
-Bump `version` in `package.json` in a PR and merge it. The `Release` workflow
-sees a version that is not on npm yet, runs `bun run check`, publishes with
-provenance, and creates the `vX.Y.Z` tag and GitHub release. Merging a PR that
-leaves the version alone publishes nothing.
+Versions are computed, never edited by hand (`package.json` says
+`0.0.0-development` on purpose). `scripts/version.ts` reads the last `vX.Y.Z`
+git tag and the commit messages since then:
 
-Follow semver: a changed number in a tax result is at least a minor bump, a
-changed `TaxSystem` / `TaxInput` / `TaxResult` shape is a major bump (minor
-while on 0.x).
+| Commits since the last release | Bump |
+| --- | --- |
+| any `feat!:` / `fix!:` / `BREAKING CHANGE:` footer | major (minor while on 0.x) |
+| any `feat:` | minor |
+| anything else | patch |
+
+- **Alpha, automatic.** Every merge to `main` that touches code publishes
+  `<next>-alpha.<n>` under the npm dist-tag `alpha` (`bun add @excited-live/tax@alpha`).
+  `n` counts up per upcoming version.
+- **Stable, on demand.** Actions → Release → Run workflow (on `main`). It
+  publishes `<next>` under `latest`, tags `vX.Y.Z`, and creates a GitHub release
+  with generated notes. The bump input overrides the computed one; pick `major`
+  to cut 1.0.0.
+
+PR titles must be conventional commits (the `PR title` check enforces it),
+because the squash-merge commit subject is the PR title.
+
+Preview the next version locally:
+
+```bash
+bun scripts/version.ts --channel alpha
+bun scripts/version.ts --channel stable
+```

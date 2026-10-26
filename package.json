@@ -1,6 +1,6 @@
 {
 	"name": "@excited-live/tax",
-	"version": "0.1.0",
+	"version": "0.0.0-development",
 	"description": "Pure, multi-jurisdiction individual income tax engine (TH 2026, US placeholder)",
 	"license": "MIT",
 	"repository": {
