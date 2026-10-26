@@ -28,7 +28,7 @@
 	"scripts": {
 		"build": "tsup",
 		"test": "bun test",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
 		"lint": "biome ci --error-on-warnings .",
 		"format": "biome check --write .",
 		"check": "bun run lint && bun run typecheck && bun test && bun run build"

@@ -50,7 +50,9 @@ bun install
 bun test            # 109 tests, incl. the TH 2026 golden suite
 bun run typecheck
 bun run build       # tsup: dist/ with esm + cjs + d.ts
-bun run check       # all three, what CI and release run
+bun run lint        # Biome, zero warnings
+bun run format      # Biome format + import order, writes files
+bun run check       # lint + typecheck + test + build, what CI and release run
 ```
 
 ## Releasing

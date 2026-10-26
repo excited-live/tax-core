@@ -98,6 +98,6 @@ describe("config purity (US options)", () => {
 		}
 		expect(Object.isFrozen(options.filingStatuses)).toBe(true)
 		expect(Object.isFrozen(options.bracketsByStatus)).toBe(true)
-		expect(Object.isFrozen(options.bracketsByStatus.single)).toBe(true)
+		expect(Object.isFrozen(options.bracketsByStatus["single"])).toBe(true)
 	})
 })

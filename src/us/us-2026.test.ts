@@ -22,7 +22,7 @@ const DEFAULT_DEDUCTIONS: TaxInput["deductions"] = {
 /** Build a well-formed input; omitted fields default to zero. */
 function makeInput(overrides: Partial<TaxInput> = {}): TaxInput {
 	return {
-		filingStatus: overrides.filingStatus,
+		...(overrides.filingStatus !== undefined && { filingStatus: overrides.filingStatus }),
 		incomes: overrides.incomes ?? [],
 		allowances: overrides.allowances ?? DEFAULT_ALLOWANCES,
 		deductions: overrides.deductions ?? DEFAULT_DEDUCTIONS,
@@ -43,7 +43,7 @@ describe("us2026System (PLACEHOLDER)", () => {
 		// config deep-freeze, this is the SAME frozen instance as
 		// options.bracketsByStatus.single (compute() reads that shared array).
 		expect(us2026System.config.brackets).toStrictEqual(
-			us2026System.config.options.bracketsByStatus.single!,
+			us2026System.config.options.bracketsByStatus["single"]!,
 		)
 		expect(us2026System.config.options.filingStatuses).toHaveLength(4)
 	})
