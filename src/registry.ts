@@ -1,5 +1,5 @@
-import type { TaxCountry, TaxSystem } from "./types"
 import { thai2026System } from "./thai/thai-2026"
+import type { TaxCountry, TaxSystem } from "./types"
 import { us2026System } from "./us/us-2026"
 
 const systems = new Map<string, TaxSystem>()

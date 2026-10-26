@@ -9,11 +9,11 @@
  * (en + th); the UI launches EN-first in Thailand.
  */
 
-export * from "./types"
 export {
-	registerTaxSystem,
-	getTaxSystem,
 	availableTaxSystems,
+	getTaxSystem,
+	registerTaxSystem,
 } from "./registry"
 export { thai2026System } from "./thai/thai-2026"
+export * from "./types"
 export { us2026System } from "./us/us-2026"

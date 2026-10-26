@@ -21,7 +21,7 @@
  * taxpayer, over-deducting for multiple employment lines. The
  * `multiline_employment` tests are the regression guard for the fix.
  */
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import type { TaxInput } from "../types"
 import { thai2026System } from "./thai-2026"
 
@@ -83,7 +83,12 @@ describe("thai2026System golden scenarios (independent recompute)", () => {
 			input({
 				incomes: [{ categoryCode: "freelance", amount: 600_000 }],
 				allowances: { personal: 1, spouse: 1, children: 1, parents: 0, disabled: 0 },
-				deductions: { insurance: 25_000, mortgageInterest: 0, donations: 20_000, retirementSavings: { ssf: 0, rmf: 100_000, provident: 0 } },
+				deductions: {
+					insurance: 25_000,
+					mortgageInterest: 0,
+					donations: 20_000,
+					retirementSavings: { ssf: 0, rmf: 100_000, provident: 0 },
+				},
 			}),
 		)
 		expect(result.assessableIncome).toBe(420_000)
@@ -105,7 +110,12 @@ describe("thai2026System golden scenarios (independent recompute)", () => {
 		const result = thai2026System.compute(
 			input({
 				incomes: [{ categoryCode: "rental", amount: 480_000 }, employment(240_000)],
-				deductions: { insurance: 0, mortgageInterest: 90_000, donations: 0, retirementSavings: { ssf: 0, rmf: 0, provident: 0 } },
+				deductions: {
+					insurance: 0,
+					mortgageInterest: 90_000,
+					donations: 0,
+					retirementSavings: { ssf: 0, rmf: 0, provident: 0 },
+				},
 			}),
 		)
 		expect(result.assessableIncome).toBe(476_000)
@@ -129,7 +139,12 @@ describe("thai2026System golden scenarios (independent recompute)", () => {
 			input({
 				incomes: [employment(2_000_000)],
 				allowances: { personal: 1, spouse: 1, children: 0, parents: 0, disabled: 0 },
-				deductions: { insurance: 100_000, mortgageInterest: 0, donations: 0, retirementSavings: { ssf: 180_000, rmf: 0, provident: 240_000 } },
+				deductions: {
+					insurance: 100_000,
+					mortgageInterest: 0,
+					donations: 0,
+					retirementSavings: { ssf: 180_000, rmf: 0, provident: 240_000 },
+				},
 			}),
 		)
 		expect(result.assessableIncome).toBe(1_900_000)
@@ -150,7 +165,11 @@ describe("thai2026System golden scenarios (independent recompute)", () => {
 		// balance: 6,650 − 25,000 = −18,350 (refund)
 		const result = thai2026System.compute(
 			input({
-				incomes: [employment(420_000), { categoryCode: "interest", amount: 15_000 }, { categoryCode: "dividend", amount: 8_000 }],
+				incomes: [
+					employment(420_000),
+					{ categoryCode: "interest", amount: 15_000 },
+					{ categoryCode: "dividend", amount: 8_000 },
+				],
 				withheld: 25_000,
 			}),
 		)
@@ -160,7 +179,11 @@ describe("thai2026System golden scenarios (independent recompute)", () => {
 		expect(result.taxLiability).toBe(6_650)
 		expect(result.netTax).toBe(6_650)
 		expect(result.balance).toBe(-18_350)
-		expect(result.warnings.some((w) => w.includes("Interest 20,000 exemption and dividend tax credit not modeled"))).toBe(true)
+		expect(
+			result.warnings.some((w) =>
+				w.includes("Interest 20,000 exemption and dividend tax credit not modeled"),
+			),
+		).toBe(true)
 	})
 })
 
@@ -171,7 +194,10 @@ describe("thai2026System golden scenarios (independent recompute)", () => {
 describe("thai2026System cap boundaries (independent recompute)", () => {
 	it("insurance exactly 100,000 applies in full", () => {
 		const result = thai2026System.compute(
-			input({ incomes: [employment(1_000_000)], deductions: { ...noDeductions, insurance: 100_000 } }),
+			input({
+				incomes: [employment(1_000_000)],
+				deductions: { ...noDeductions, insurance: 100_000 },
+			}),
 		)
 		expect(result.itemizedDeductions).toBe(100_000)
 		expect(result.taxableIncome).toBe(740_000)
@@ -181,7 +207,10 @@ describe("thai2026System cap boundaries (independent recompute)", () => {
 
 	it("insurance 100,001 clamps to 100,000 with same result", () => {
 		const result = thai2026System.compute(
-			input({ incomes: [employment(1_000_000)], deductions: { ...noDeductions, insurance: 100_001 } }),
+			input({
+				incomes: [employment(1_000_000)],
+				deductions: { ...noDeductions, insurance: 100_001 },
+			}),
 		)
 		expect(result.itemizedDeductions).toBe(100_000)
 		expect(result.taxableIncome).toBe(740_000)
@@ -190,7 +219,10 @@ describe("thai2026System cap boundaries (independent recompute)", () => {
 
 	it("mortgage interest exactly 100,000 applies in full", () => {
 		const result = thai2026System.compute(
-			input({ incomes: [employment(1_000_000)], deductions: { ...noDeductions, mortgageInterest: 100_000 } }),
+			input({
+				incomes: [employment(1_000_000)],
+				deductions: { ...noDeductions, mortgageInterest: 100_000 },
+			}),
 		)
 		expect(result.itemizedDeductions).toBe(100_000)
 		expect(result.taxableIncome).toBe(740_000)
@@ -200,7 +232,10 @@ describe("thai2026System cap boundaries (independent recompute)", () => {
 
 	it("mortgage interest 250,000 clamps to 100,000", () => {
 		const result = thai2026System.compute(
-			input({ incomes: [employment(1_000_000)], deductions: { ...noDeductions, mortgageInterest: 250_000 } }),
+			input({
+				incomes: [employment(1_000_000)],
+				deductions: { ...noDeductions, mortgageInterest: 250_000 },
+			}),
 		)
 		expect(result.itemizedDeductions).toBe(100_000)
 		expect(result.taxableIncome).toBe(740_000)
@@ -210,7 +245,10 @@ describe("thai2026System cap boundaries (independent recompute)", () => {
 	it("donations exactly at 10% of assessable apply in full, no warning", () => {
 		// assessable 900k → cap 90k; input exactly 90k
 		const result = thai2026System.compute(
-			input({ incomes: [employment(1_000_000)], deductions: { ...noDeductions, donations: 90_000 } }),
+			input({
+				incomes: [employment(1_000_000)],
+				deductions: { ...noDeductions, donations: 90_000 },
+			}),
 		)
 		expect(result.itemizedDeductions).toBe(90_000)
 		expect(result.taxableIncome).toBe(750_000)
@@ -220,7 +258,10 @@ describe("thai2026System cap boundaries (independent recompute)", () => {
 
 	it("donations 90,001 clamps to 90,000 with warning", () => {
 		const result = thai2026System.compute(
-			input({ incomes: [employment(1_000_000)], deductions: { ...noDeductions, donations: 90_001 } }),
+			input({
+				incomes: [employment(1_000_000)],
+				deductions: { ...noDeductions, donations: 90_001 },
+			}),
 		)
 		expect(result.itemizedDeductions).toBe(90_000)
 		expect(result.taxableIncome).toBe(750_000)
@@ -303,7 +344,10 @@ describe("thai2026System allowances and structural edges (independent recompute)
 		// employment 280k → expense min(50%·280k=140k, 100k cap) = 100k
 		// assessable 180k; allowances 60+60+30+30 = 180k → taxable 0
 		const result = thai2026System.compute(
-			input({ incomes: [employment(280_000)], allowances: { personal: 1, spouse: 1, children: 2, parents: 0, disabled: 0 } }),
+			input({
+				incomes: [employment(280_000)],
+				allowances: { personal: 1, spouse: 1, children: 2, parents: 0, disabled: 0 },
+			}),
 		)
 		expect(result.assessableIncome).toBe(180_000)
 		expect(result.allowancesTotal).toBe(180_000)
@@ -332,7 +376,12 @@ describe("thai2026System allowances and structural edges (independent recompute)
 		const result = thai2026System.compute(
 			input({
 				incomes: [employment(300_000), employment(300_000)],
-				deductions: { insurance: 0, mortgageInterest: 0, donations: 0, retirementSavings: { ssf: 0, rmf: 0, provident: 100_000 } },
+				deductions: {
+					insurance: 0,
+					mortgageInterest: 0,
+					donations: 0,
+					retirementSavings: { ssf: 0, rmf: 0, provident: 100_000 },
+				},
 			}),
 		)
 		expect(result.itemizedDeductions).toBe(90_000)
@@ -368,13 +417,36 @@ describe("thai2026System invariants", () => {
 	it("liability equals the sum of per-bracket taxes across a 146-point sweep", () => {
 		const points = [
 			...Array.from({ length: 100 }, (_, i) => Math.round(i * 100_000)),
-			149_999, 150_000, 150_001, 299_999, 300_000, 300_001,
-			499_999, 500_000, 500_001, 749_999, 750_000, 750_001,
-			999_999, 1_000_000, 1_000_001, 1_999_999, 2_000_000, 2_000_001,
-			4_999_999, 5_000_000, 5_000_001, 10_000_000,
+			149_999,
+			150_000,
+			150_001,
+			299_999,
+			300_000,
+			300_001,
+			499_999,
+			500_000,
+			500_001,
+			749_999,
+			750_000,
+			750_001,
+			999_999,
+			1_000_000,
+			1_000_001,
+			1_999_999,
+			2_000_000,
+			2_000_001,
+			4_999_999,
+			5_000_000,
+			5_000_001,
+			10_000_000,
 		]
 		for (const gross of points) {
-			const result = probe(gross, { insurance: 5_000, mortgageInterest: 10_000, donations: 3_000, retirementSavings: { ssf: 7_000, rmf: 11_000, provident: 2_000 } })
+			const result = probe(gross, {
+				insurance: 5_000,
+				mortgageInterest: 10_000,
+				donations: 3_000,
+				retirementSavings: { ssf: 7_000, rmf: 11_000, provident: 2_000 },
+			})
 			const bracketSum = result.brackets.reduce((acc, b) => acc + b.tax, 0)
 			expect(result.taxLiability).toBeCloseTo(bracketSum, 2)
 			expect(result.taxableIncome).toBeGreaterThanOrEqual(0)
@@ -424,7 +496,9 @@ describe("thai2026System validate hardening", () => {
 
 	it("rejects negative retirement savings", () => {
 		const problems = thai2026System.validate(
-			input({ deductions: { ...noDeductions, retirementSavings: { ssf: -1, rmf: 0, provident: 0 } } }),
+			input({
+				deductions: { ...noDeductions, retirementSavings: { ssf: -1, rmf: 0, provident: 0 } },
+			}),
 		)
 		expect(problems.length).toBeGreaterThan(0)
 	})

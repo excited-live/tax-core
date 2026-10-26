@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
-import type { TaxInput } from "./types"
-import { getTaxSystem } from "./registry"
 import { deepFreeze } from "./deep-freeze"
+import { getTaxSystem } from "./registry"
+import type { TaxInput } from "./types"
 
 const SAMPLE_INPUT: TaxInput = {
 	incomes: [{ categoryCode: "employment", amount: 900_000 }],

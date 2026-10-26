@@ -11,7 +11,7 @@
  * - Labels are bilingual (en + th) from day one; UI launches EN-first in Thailand.
  */
 
-export type TaxCountry = 'TH' | 'US'
+export type TaxCountry = "TH" | "US"
 
 export interface LocalizedLabel {
 	en: string

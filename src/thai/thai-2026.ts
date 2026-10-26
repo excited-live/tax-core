@@ -16,6 +16,7 @@
  * Pure logic only: no network, no DOM, no date dependence (tax year fixed in config).
  */
 
+import { deepFreeze } from "../deep-freeze"
 import type {
 	AllowanceDef,
 	BracketBreakdown,
@@ -27,7 +28,6 @@ import type {
 	TaxResult,
 	TaxSystem,
 } from "../types"
-import { deepFreeze } from "../deep-freeze"
 
 const CURRENCY = "THB"
 const TAX_YEAR = 2026
@@ -197,7 +197,12 @@ function compute(input: TaxInput): TaxResult {
 	// Itemized deductions (Thai: ค่าลดหย่อน).
 	const deductionLines: DeductionLine[] = []
 
-	const pushLine = (code: string, label: LocalizedLabel, entered: number, applied: number): void => {
+	const pushLine = (
+		code: string,
+		label: LocalizedLabel,
+		entered: number,
+		applied: number,
+	): void => {
 		deductionLines.push({
 			code,
 			label,
@@ -372,12 +377,7 @@ function compute(input: TaxInput): TaxResult {
 	const donationsCap = round2(CAP_DONATIONS_RATE * assessableIncome)
 	const donationsEff = round2(Math.min(effectiveDonationsTotal, donationsCap))
 
-	pushLine(
-		"donations",
-		{ en: "Donations", th: "เงินบริจาค" },
-		effectiveDonationsTotal,
-		donationsEff,
-	)
+	pushLine("donations", { en: "Donations", th: "เงินบริจาค" }, effectiveDonationsTotal, donationsEff)
 
 	if (effectiveDonationsTotal > donationsCap) {
 		if (doubleDonations > 0) {
@@ -413,9 +413,7 @@ function compute(input: TaxInput): TaxResult {
 			input.allowances.disabled * ALLOWANCE_DISABLED,
 	)
 
-	const taxableIncome = round2(
-		Math.max(0, assessableIncome - itemizedDeductions - allowancesTotal),
-	)
+	const taxableIncome = round2(Math.max(0, assessableIncome - itemizedDeductions - allowancesTotal))
 
 	// Progressive per-bracket computation
 	let from = 0
@@ -485,7 +483,9 @@ function compute(input: TaxInput): TaxResult {
 
 	// Note on unmodeled exemptions
 	if (hasInterest || hasDividendWithoutCit) {
-		warnings.push("Interest 20,000 exemption and dividend tax credit not modeled in v1 (simplification)")
+		warnings.push(
+			"Interest 20,000 exemption and dividend tax credit not modeled in v1 (simplification)",
+		)
 	}
 
 	return {
@@ -534,7 +534,9 @@ function validate(input: TaxInput): string[] {
 		}
 		if (line.citRate !== undefined) {
 			if (!Number.isFinite(line.citRate) || line.citRate < 0 || line.citRate >= 1) {
-				problems.push(`CIT rate for dividend must be a number between 0 and 1 (got ${line.citRate})`)
+				problems.push(
+					`CIT rate for dividend must be a number between 0 and 1 (got ${line.citRate})`,
+				)
 			}
 		}
 	}
@@ -544,7 +546,10 @@ function validate(input: TaxInput): string[] {
 	checkNonNegativeFinite(allowances.spouse, "allowances.spouse count")
 	checkNonNegativeFinite(allowances.children, "allowances.children count")
 	if (allowances.childrenSecondPlus2018 !== undefined) {
-		checkNonNegativeFinite(allowances.childrenSecondPlus2018, "allowances.childrenSecondPlus2018 count")
+		checkNonNegativeFinite(
+			allowances.childrenSecondPlus2018,
+			"allowances.childrenSecondPlus2018 count",
+		)
 	}
 	checkNonNegativeFinite(allowances.parents, "allowances.parents count")
 	checkNonNegativeFinite(allowances.disabled, "allowances.disabled count")
@@ -559,7 +564,10 @@ function validate(input: TaxInput): string[] {
 	checkNonNegativeInteger(allowances.spouse, "allowances.spouse count")
 	checkNonNegativeInteger(allowances.children, "allowances.children count")
 	if (allowances.childrenSecondPlus2018 !== undefined) {
-		checkNonNegativeInteger(allowances.childrenSecondPlus2018, "allowances.childrenSecondPlus2018 count")
+		checkNonNegativeInteger(
+			allowances.childrenSecondPlus2018,
+			"allowances.childrenSecondPlus2018 count",
+		)
 	}
 	checkNonNegativeInteger(allowances.parents, "allowances.parents count")
 	checkNonNegativeInteger(allowances.disabled, "allowances.disabled count")
@@ -598,7 +606,10 @@ function validate(input: TaxInput): string[] {
 
 	checkNonNegativeFinite(deductions.retirementSavings.ssf, "deductions.retirementSavings.ssf")
 	checkNonNegativeFinite(deductions.retirementSavings.rmf, "deductions.retirementSavings.rmf")
-	checkNonNegativeFinite(deductions.retirementSavings.provident, "deductions.retirementSavings.provident")
+	checkNonNegativeFinite(
+		deductions.retirementSavings.provident,
+		"deductions.retirementSavings.provident",
+	)
 	if (deductions.retirementSavings.pensionInsurance !== undefined) {
 		checkNonNegativeFinite(
 			deductions.retirementSavings.pensionInsurance,

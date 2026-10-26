@@ -8,11 +8,7 @@
 		"skipLibCheck": true,
 		"declaration": true,
 		"noUncheckedIndexedAccess": true,
-		"types": [
-			"bun"
-		]
+		"types": ["bun"]
 	},
-	"include": [
-		"src"
-	]
+	"include": ["src"]
 }

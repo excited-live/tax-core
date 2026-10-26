@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import type { TaxInput } from "../types"
 import { thai2026System } from "./thai-2026"
 
@@ -49,7 +49,9 @@ describe("thai2026System basic computation", () => {
 		expect(result.marginalRate).toBe(0)
 		expect(result.effectiveRate).toBe(0)
 		expect(result.balance).toBe(0)
-		expect(result.brackets.every((bracket) => bracket.tax === 0 && bracket.taxableInBracket === 0)).toBe(true)
+		expect(
+			result.brackets.every((bracket) => bracket.tax === 0 && bracket.taxableInBracket === 0),
+		).toBe(true)
 		expect(result.warnings).toEqual([])
 	})
 
@@ -79,7 +81,15 @@ describe("thai2026System basic computation", () => {
 
 	it("employment 500,000 + insurance 40,000: taxable exactly 300,000, top bracket 5%", () => {
 		const result = thai2026System.compute(
-			input({ incomes: [employment(500_000)], deductions: { insurance: 40_000, mortgageInterest: 0, donations: 0, retirementSavings: { ssf: 0, rmf: 0, provident: 0 } } }),
+			input({
+				incomes: [employment(500_000)],
+				deductions: {
+					insurance: 40_000,
+					mortgageInterest: 0,
+					donations: 0,
+					retirementSavings: { ssf: 0, rmf: 0, provident: 0 },
+				},
+			}),
 		)
 		expect(result.assessableIncome).toBe(400_000)
 		expect(result.taxableIncome).toBe(300_000)
@@ -101,7 +111,12 @@ describe("thai2026System itemized deductions", () => {
 		const result = thai2026System.compute(
 			input({
 				incomes: [employment(1_000_000)],
-				deductions: { insurance: 0, mortgageInterest: 0, donations: 0, retirementSavings: { ssf: 300_000, rmf: 400_000, provident: 200_000 } },
+				deductions: {
+					insurance: 0,
+					mortgageInterest: 0,
+					donations: 0,
+					retirementSavings: { ssf: 300_000, rmf: 400_000, provident: 200_000 },
+				},
 			}),
 		)
 		// assessable = 1,000,000 - 100,000 (expense cap)
@@ -111,14 +126,21 @@ describe("thai2026System itemized deductions", () => {
 		expect(result.itemizedDeductions).toBe(500_000)
 		expect(result.taxableIncome).toBe(340_000)
 		expect(result.taxLiability).toBe(11_500)
-		expect(result.warnings.some((warning) => warning.includes("Retirement savings capped at 500,000"))).toBe(true)
+		expect(
+			result.warnings.some((warning) => warning.includes("Retirement savings capped at 500,000")),
+		).toBe(true)
 	})
 
 	it("donations: capped at 10% of assessable income with warning", () => {
 		const result = thai2026System.compute(
 			input({
 				incomes: [employment(1_000_000)],
-				deductions: { insurance: 0, mortgageInterest: 0, donations: 300_000, retirementSavings: { ssf: 0, rmf: 0, provident: 0 } },
+				deductions: {
+					insurance: 0,
+					mortgageInterest: 0,
+					donations: 300_000,
+					retirementSavings: { ssf: 0, rmf: 0, provident: 0 },
+				},
 			}),
 		)
 		// assessable 900,000 -> donations capped at 90,000
@@ -132,7 +154,9 @@ describe("thai2026System itemized deductions", () => {
 
 describe("thai2026System balance and allowances", () => {
 	it("balance: negative means refund, positive means still owed", () => {
-		const result = thai2026System.compute(input({ incomes: [employment(500_000)], withheld: 20_000 }))
+		const result = thai2026System.compute(
+			input({ incomes: [employment(500_000)], withheld: 20_000 }),
+		)
 		expect(result.netTax).toBe(11_500)
 		expect(result.balance).toBe(-8_500)
 
@@ -145,7 +169,10 @@ describe("thai2026System balance and allowances", () => {
 
 	it("allowances: personal + spouse + 2 children", () => {
 		const result = thai2026System.compute(
-			input({ incomes: [employment(500_000)], allowances: { personal: 1, spouse: 1, children: 2, parents: 0, disabled: 0 } }),
+			input({
+				incomes: [employment(500_000)],
+				allowances: { personal: 1, spouse: 1, children: 2, parents: 0, disabled: 0 },
+			}),
 		)
 		expect(result.allowancesTotal).toBe(180_000)
 		expect(result.taxableIncome).toBe(220_000)
@@ -208,7 +235,9 @@ describe("thai2026System warnings", () => {
 		// interest has no expense deduction: assessable = 400,000 + 30,000 = 430,000
 		expect(result.assessableIncome).toBe(430_000)
 		expect(
-			result.warnings.some((warning) => warning.includes("Interest 20,000 exemption and dividend tax credit not modeled")),
+			result.warnings.some((warning) =>
+				warning.includes("Interest 20,000 exemption and dividend tax credit not modeled"),
+			),
 		).toBe(true)
 	})
 
@@ -233,22 +262,30 @@ describe("thai2026System validate", () => {
 	})
 
 	it("rejects non-finite income amounts", () => {
-		const problems = thai2026System.validate(input({ incomes: [{ categoryCode: "employment", amount: Infinity }] }))
+		const problems = thai2026System.validate(
+			input({ incomes: [{ categoryCode: "employment", amount: Infinity }] }),
+		)
 		expect(problems.length).toBeGreaterThan(0)
 	})
 
 	it("rejects unknown income category codes", () => {
-		const problems = thai2026System.validate(input({ incomes: [{ categoryCode: "crypto", amount: 1_000 }] }))
+		const problems = thai2026System.validate(
+			input({ incomes: [{ categoryCode: "crypto", amount: 1_000 }] }),
+		)
 		expect(problems.length).toBeGreaterThan(0)
 	})
 
 	it("rejects negative withheld", () => {
-		const problems = thai2026System.validate(input({ incomes: [employment(100_000)], withheld: -100 }))
+		const problems = thai2026System.validate(
+			input({ incomes: [employment(100_000)], withheld: -100 }),
+		)
 		expect(problems.length).toBeGreaterThan(0)
 	})
 
 	it("rejects parents count above the RD max of 4", () => {
-		const problems = thai2026System.validate(input({ allowances: { personal: 1, spouse: 0, children: 0, parents: 5, disabled: 0 } }))
+		const problems = thai2026System.validate(
+			input({ allowances: { personal: 1, spouse: 0, children: 0, parents: 5, disabled: 0 } }),
+		)
 		expect(problems.some((problem) => problem.includes("at most 4"))).toBe(true)
 	})
 
@@ -263,16 +300,31 @@ describe("thai2026System parents allowance", () => {
 	it("parents count deducts 30,000 each (no parent allowance by default)", () => {
 		const base = thai2026System.compute(input({ incomes: [employment(900_000)] }))
 		const withParents = thai2026System.compute(
-			input({ incomes: [employment(900_000)], allowances: { personal: 1, spouse: 0, children: 0, parents: 2, disabled: 0 } }),
+			input({
+				incomes: [employment(900_000)],
+				allowances: { personal: 1, spouse: 0, children: 0, parents: 2, disabled: 0 },
+			}),
 		)
 		expect(withParents.allowancesTotal - base.allowancesTotal).toBe(60_000)
 		expect(withParents.taxableIncome).toBe(base.taxableIncome - 60_000)
 	})
 
 	it("validate rejects non-integer or negative parents", () => {
-		expect(thai2026System.validate(input({ allowances: { personal: 1, spouse: 0, children: 0, parents: -1, disabled: 0 } })).length).toBeGreaterThan(0)
-		expect(thai2026System.validate(input({ allowances: { personal: 1, spouse: 0, children: 0, parents: 1.5, disabled: 0 } })).length).toBeGreaterThan(0)
-		expect(thai2026System.validate(input({ allowances: { personal: 1, spouse: 0, children: 0, parents: 4, disabled: 0 } }))).toEqual([])
+		expect(
+			thai2026System.validate(
+				input({ allowances: { personal: 1, spouse: 0, children: 0, parents: -1, disabled: 0 } }),
+			).length,
+		).toBeGreaterThan(0)
+		expect(
+			thai2026System.validate(
+				input({ allowances: { personal: 1, spouse: 0, children: 0, parents: 1.5, disabled: 0 } }),
+			).length,
+		).toBeGreaterThan(0)
+		expect(
+			thai2026System.validate(
+				input({ allowances: { personal: 1, spouse: 0, children: 0, parents: 4, disabled: 0 } }),
+			),
+		).toEqual([])
 	})
 })
 
@@ -353,7 +405,9 @@ describe("thai2026System deductionLines", () => {
 
 	it("empty deductions → no lines reported", () => {
 		const result = thai2026System.compute(input({ incomes: [employment(900_000)] }))
-		expect(result.deductionLines.every((line) => line.entered === 0 && line.applied === 0)).toBe(true)
+		expect(result.deductionLines.every((line) => line.entered === 0 && line.applied === 0)).toBe(
+			true,
+		)
 	})
 
 	it("allowanceDefs exposes bilingual parents definition at 30,000", () => {
@@ -690,9 +744,7 @@ describe("Thai 2026 Validation Extended Checks", () => {
 		]
 
 		for (const ded of negativeDeductions) {
-			const errs = thai2026System.validate(
-				makeInput({ deductions: { ...noDeductions, ...ded } }),
-			)
+			const errs = thai2026System.validate(makeInput({ deductions: { ...noDeductions, ...ded } }))
 			expect(errs.length).toBeGreaterThan(0)
 			expect(errs[0]).toContain("must be a non-negative finite number")
 		}
@@ -711,9 +763,7 @@ describe("Thai 2026 Validation Extended Checks", () => {
 		]
 
 		for (const ded of nanDeductions) {
-			const errs = thai2026System.validate(
-				makeInput({ deductions: { ...noDeductions, ...ded } }),
-			)
+			const errs = thai2026System.validate(makeInput({ deductions: { ...noDeductions, ...ded } }))
 			expect(errs.length).toBeGreaterThan(0)
 			expect(errs[0]).toContain("must be a non-negative finite number")
 		}

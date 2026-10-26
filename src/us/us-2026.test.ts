@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import type { TaxInput } from "../types"
 import { us2026System } from "./us-2026"
 
@@ -76,18 +76,41 @@ describe("us2026System (PLACEHOLDER)", () => {
 		expect(r.netTax).toBe(1_561.5)
 		expect(r.marginalRate).toBe(0.12)
 		expect(r.effectiveRate).toBeCloseTo(1_561.5 / 30_000, 4)
-		expect(r.brackets[0]).toMatchObject({ index: 0, from: 0, to: 11_925, taxableInBracket: 11_925, tax: 1_192.5 })
-		expect(r.brackets[1]).toMatchObject({ index: 1, from: 11_925, to: 48_475, taxableInBracket: 3_075, tax: 369 })
+		expect(r.brackets[0]).toMatchObject({
+			index: 0,
+			from: 0,
+			to: 11_925,
+			taxableInBracket: 11_925,
+			tax: 1_192.5,
+		})
+		expect(r.brackets[1]).toMatchObject({
+			index: 1,
+			from: 11_925,
+			to: 48_475,
+			taxableInBracket: 3_075,
+			tax: 369,
+		})
 	})
 
 	it("single, wages 30,000, withheld 1,500 -> balance 61.50", () => {
-		const r = compute(makeInput({ filingStatus: "single", incomes: [{ categoryCode: "wages", amount: 30_000 }], withheld: 1_500 }))
+		const r = compute(
+			makeInput({
+				filingStatus: "single",
+				incomes: [{ categoryCode: "wages", amount: 30_000 }],
+				withheld: 1_500,
+			}),
+		)
 		expect(r.taxLiability).toBe(1_561.5)
 		expect(r.balance).toBe(61.5)
 	})
 
 	it("married_joint, wages 30,000 -> std 30,000, taxable 0, netTax 0", () => {
-		const r = compute(makeInput({ filingStatus: "married_joint", incomes: [{ categoryCode: "wages", amount: 30_000 }] }))
+		const r = compute(
+			makeInput({
+				filingStatus: "married_joint",
+				incomes: [{ categoryCode: "wages", amount: 30_000 }],
+			}),
+		)
 		expect(r.standardDeduction).toBe(30_000)
 		expect(r.taxableIncome).toBe(0)
 		expect(r.taxLiability).toBe(0)
@@ -96,7 +119,12 @@ describe("us2026System (PLACEHOLDER)", () => {
 	})
 
 	it("head_of_household, wages 30,000 -> std 22,500, taxable 7,500, liability 750.00", () => {
-		const r = compute(makeInput({ filingStatus: "head_of_household", incomes: [{ categoryCode: "wages", amount: 30_000 }] }))
+		const r = compute(
+			makeInput({
+				filingStatus: "head_of_household",
+				incomes: [{ categoryCode: "wages", amount: 30_000 }],
+			}),
+		)
 		expect(r.standardDeduction).toBe(22_500)
 		expect(r.taxableIncome).toBe(7_500)
 		expect(r.taxLiability).toBe(750)
@@ -105,7 +133,12 @@ describe("us2026System (PLACEHOLDER)", () => {
 	})
 
 	it("married_separate, wages 50,000 -> std 15,000, taxable 35,000, liability 3,961.50", () => {
-		const r = compute(makeInput({ filingStatus: "married_separate", incomes: [{ categoryCode: "wages", amount: 50_000 }] }))
+		const r = compute(
+			makeInput({
+				filingStatus: "married_separate",
+				incomes: [{ categoryCode: "wages", amount: 50_000 }],
+			}),
+		)
 		expect(r.standardDeduction).toBe(15_000)
 		expect(r.taxableIncome).toBe(35_000)
 		// 1,192.50 + (35,000 - 11,925) * 0.12 = 1,192.50 + 2,769.00
@@ -249,11 +282,19 @@ describe("us2026System (PLACEHOLDER)", () => {
 
 	it("validate rejects negative, non-finite and unknown-category inputs", () => {
 		expect(validate(makeInput({ incomes: [{ categoryCode: "wages", amount: -1 }] })).length).toBe(1)
-		expect(validate(makeInput({ incomes: [{ categoryCode: "wages", amount: NaN }] })).length).toBe(1)
-		expect(validate(makeInput({ incomes: [{ categoryCode: "unknown_code", amount: 1_000 }] })).length).toBe(1)
+		expect(validate(makeInput({ incomes: [{ categoryCode: "wages", amount: NaN }] })).length).toBe(
+			1,
+		)
+		expect(
+			validate(makeInput({ incomes: [{ categoryCode: "unknown_code", amount: 1_000 }] })).length,
+		).toBe(1)
 		expect(validate(makeInput({ withheld: -50 })).length).toBe(1)
 		expect(validate(makeInput({ estimatedPaid: Infinity })).length).toBe(1)
-		expect(validate(makeInput({ allowances: { ...DEFAULT_ALLOWANCES, personal: -1 } })).length).toBe(1)
-		expect(validate(makeInput({ deductions: { ...DEFAULT_DEDUCTIONS, insurance: -100 } })).length).toBe(1)
+		expect(
+			validate(makeInput({ allowances: { ...DEFAULT_ALLOWANCES, personal: -1 } })).length,
+		).toBe(1)
+		expect(
+			validate(makeInput({ deductions: { ...DEFAULT_DEDUCTIONS, insurance: -100 } })).length,
+		).toBe(1)
 	})
 })

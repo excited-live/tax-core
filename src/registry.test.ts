@@ -1,11 +1,7 @@
-import type { TaxCountry } from "./types"
 import { describe, expect, it } from "bun:test"
-import {
-	availableTaxSystems,
-	getTaxSystem,
-	registerTaxSystem,
-} from "./registry"
+import { availableTaxSystems, getTaxSystem, registerTaxSystem } from "./registry"
 import { thai2026System } from "./thai/thai-2026"
+import type { TaxCountry } from "./types"
 
 describe("registry", () => {
 	it("resolves built-in systems by country + tax year", () => {

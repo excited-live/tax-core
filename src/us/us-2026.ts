@@ -21,6 +21,7 @@
  * Pure logic only: no network, no DOM, no date dependence.
  */
 
+import { deepFreeze } from "../deep-freeze"
 import type {
 	IncomeCategory,
 	LocalizedLabel,
@@ -30,7 +31,6 @@ import type {
 	TaxSystem,
 	TaxSystemConfig,
 } from "../types"
-import { deepFreeze } from "../deep-freeze"
 
 const CURRENCY = "USD"
 const TAX_YEAR = 2026
@@ -180,8 +180,7 @@ function compute(input: TaxInput): UsTaxResult {
 	// Filing status: pick by input.filingStatus, defaulting to "single".
 	// An unknown status (reported by validate()) falls back to single here.
 	const statusCode = input.filingStatus ?? "single"
-	const statusOption =
-		FILING_STATUSES.find((status) => status.code === statusCode) ?? SINGLE_STATUS
+	const statusOption = FILING_STATUSES.find((status) => status.code === statusCode) ?? SINGLE_STATUS
 	if (input.filingStatus !== undefined && statusOption.code !== input.filingStatus) {
 		errors.push(`Unknown filing status: ${input.filingStatus}`)
 	}
@@ -323,7 +322,10 @@ function validate(input: TaxInput): string[] {
 	checkNonNegativeFinite(allowances.spouse, "allowances.spouse count")
 	checkNonNegativeFinite(allowances.children, "allowances.children count")
 	if (allowances.childrenSecondPlus2018 !== undefined) {
-		checkNonNegativeFinite(allowances.childrenSecondPlus2018, "allowances.childrenSecondPlus2018 count")
+		checkNonNegativeFinite(
+			allowances.childrenSecondPlus2018,
+			"allowances.childrenSecondPlus2018 count",
+		)
 	}
 	checkNonNegativeFinite(allowances.parents, "allowances.parents count")
 	checkNonNegativeFinite(allowances.disabled, "allowances.disabled count")
@@ -356,7 +358,10 @@ function validate(input: TaxInput): string[] {
 
 	checkNonNegativeFinite(deductions.retirementSavings.ssf, "deductions.retirementSavings.ssf")
 	checkNonNegativeFinite(deductions.retirementSavings.rmf, "deductions.retirementSavings.rmf")
-	checkNonNegativeFinite(deductions.retirementSavings.provident, "deductions.retirementSavings.provident")
+	checkNonNegativeFinite(
+		deductions.retirementSavings.provident,
+		"deductions.retirementSavings.provident",
+	)
 	if (deductions.retirementSavings.pensionInsurance !== undefined) {
 		checkNonNegativeFinite(
 			deductions.retirementSavings.pensionInsurance,
