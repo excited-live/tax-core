@@ -1,12 +1,11 @@
 import type { BracketSlice } from "../../core/brackets"
 import type { ClampedAmount } from "../../core/caps"
 import type { Money } from "../../core/money"
+import type { UsAmtBreakdown } from "./breakdown-amt"
+import type { UsCreditsBreakdown } from "./breakdown-credits"
+import type { UsFicaBreakdown, UsScheduleSeBreakdown } from "./breakdown-payroll"
 
-/**
- * Audit slice for Long-Term Capital Gains & Qualified Dividends preferential stacking.
- *
- * @statute IRC § 1(h)
- */
+/** Audit slice for Long-Term Capital Gains & Qualified Dividends (IRC § 1(h)). */
 export interface UsPreferentialSlice {
 	readonly tier: number
 	readonly rate: number
@@ -14,11 +13,7 @@ export interface UsPreferentialSlice {
 	readonly tax: Money<"USD">
 }
 
-/**
- * Breakdown of Standard Deduction evaluation including additional amounts for age and blindness.
- *
- * @statute IRC § 63(c), § 63(f)
- */
+/** Breakdown of Standard Deduction evaluation (IRC § 63(c), § 63(f)). */
 export interface UsStandardDeductionBreakdown {
 	readonly base: Money<"USD">
 	readonly additionalConditionsCount: number
@@ -27,11 +22,7 @@ export interface UsStandardDeductionBreakdown {
 	readonly total: Money<"USD">
 }
 
-/**
- * Breakdown of Schedule A Itemized Deductions audit trail.
- *
- * @statute IRC §§ 164, 170, 213
- */
+/** Breakdown of Schedule A Itemized Deductions audit trail (IRC §§ 164, 170, 213). */
 export interface UsItemizedBreakdown {
 	readonly medical: ClampedAmount
 	readonly salt: ClampedAmount
@@ -40,11 +31,7 @@ export interface UsItemizedBreakdown {
 	readonly total: Money<"USD">
 }
 
-/**
- * Breakdown of Schedule 1 Above-the-Line Adjustments to income.
- *
- * @statute IRC § 62
- */
+/** Breakdown of Schedule 1 Above-the-Line Adjustments to income (IRC § 62). */
 export interface UsAdjustmentsBreakdown {
 	readonly educatorExpenses: ClampedAmount
 	readonly hsa: ClampedAmount
@@ -55,11 +42,7 @@ export interface UsAdjustmentsBreakdown {
 	readonly totalAdjustments: Money<"USD">
 }
 
-/**
- * Breakdown of Net Investment Income Tax (NIIT) computation.
- *
- * @statute IRC § 1411
- */
+/** Breakdown of Net Investment Income Tax (NIIT) computation (IRC § 1411). */
 export interface UsNiitBreakdown {
 	readonly netInvestmentIncome: Money<"USD">
 	readonly magi: Money<"USD">
@@ -69,11 +52,7 @@ export interface UsNiitBreakdown {
 	readonly tax: Money<"USD">
 }
 
-/**
- * Detailed audit trail breakdown for US Federal Individual Income Tax calculation.
- *
- * @statute IRC § 1 et seq.
- */
+/** Detailed audit trail breakdown for US Federal Individual Income Tax (IRC § 1 et seq.). */
 export interface UsTaxBreakdown {
 	readonly ordinaryGrossIncome: Money<"USD">
 	readonly preferentialGrossIncome: Money<"USD">
@@ -92,7 +71,11 @@ export interface UsTaxBreakdown {
 	readonly preferentialTax: Money<"USD">
 	readonly preferentialSlices: readonly UsPreferentialSlice[]
 	readonly regularIncomeTax: Money<"USD">
+	readonly amt?: UsAmtBreakdown | undefined
 	readonly niit: UsNiitBreakdown
+	readonly fica?: UsFicaBreakdown | undefined
+	readonly scheduleSe?: UsScheduleSeBreakdown | undefined
+	readonly credits?: UsCreditsBreakdown | undefined
 	readonly totalTax: Money<"USD">
 	readonly withholding: Money<"USD">
 	readonly netTaxPayable: Money<"USD">
