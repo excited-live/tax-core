@@ -58,6 +58,10 @@ _Avoid_: Bonus calculation
 A taxpayer's statutory option under Section 40(4) or Section 48 to let source-withheld tax on interest, dividends, or property transfers stand as final rather than including the income in regular progressive brackets.
 _Avoid_: Tax exemption
 
+**Minimum Gross Tax**:
+The alternative tax computation mandated by Section 48(2) of the Thailand Revenue Code imposing a 0.5% tax on non-employment income (Sections 40(2)–40(8)) if it exceeds 120,000 THB and computed gross tax exceeds 5,000 THB, payable if higher than progressive tax.
+_Avoid_: Flat tax, alternative minimum tax
+
 **Dividend Tax Credit**:
 The Section 47 bis gross-up and tax credit granted when a taxpayer elects to include dividends from Thai corporate entities in regular progressive calculation to recover underlying corporate income tax.
 _Avoid_: Dividend deduction

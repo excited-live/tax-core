@@ -14,6 +14,7 @@ Instructions for AI coding agents in `excited-live/tax-core` (`@excited-live/tax
    - Cognitive complexity: max 10 per function (enforced by Biome).
    - Strict isolatedDeclarations typecheck (`tsc -p tsconfig.json && tsc -p tsconfig.test.json`).
    - Test suite with **100.00% line coverage** threshold (`scripts/check-coverage.ts`).
+   - Zero hardcoded strings or diagnostic literals: stages must consume typed field enums and parameters, never raw diagnostic string literals or raw currency strings (`scripts/check-no-hardcoded-strings.ts`).
    - Clean package build (`tsdown`), strict packaging (`publint --strict`), and node16 type checks (`attw`).
    - Run `bun run format` to auto-fix formatting and imports. Do not loosen `tsconfig.base.json` or `biome.json` to make an error go away.
 6. Never edit `version` in `package.json` and never run `npm publish` locally. Merges to `main` publish alphas; a stable release is the manual Release workflow. PR titles are conventional commits (`feat:`, `fix:`, `feat!:` ...) because they decide the next version (see README "Releasing").
@@ -24,7 +25,13 @@ When implementing statutory rules (e.g. Thailand PIT, US Federal):
 1. **Parameters as data**: Statutory amounts, rates, allowances, and brackets live in `parameters.ts` per tax year as typed constants (e.g. `TH_2026_PARAMETERS`). Never inline hardcoded numbers into logic functions.
 2. **One rule per file**: Keep statutory deduction, allowance, and expense calculations as pure functions in dedicated files under 100 lines, returning `{ value, breakdown }`.
 3. **Staged pipeline**: Wire calculations into an ordered statutory stage pipeline: `assessable` -> `expenses` -> `allowances` -> `brackets` -> `credits` -> `result`. Avoid complex dynamic DAG solvers.
-4. **Documentation (TSDoc)**: Every exported function, type, and rule must carry a concise TSDoc comment detailing **Purpose**, **Math**, **Units** (major vs integer minor units), **Throws**, and statutory citation (`@statute`).
+4. **Typed field enums & no raw strings**: Diagnostic field paths and breakdown keys (`ThAssessableField`, `ThExpenseField`, `ThAllowanceField`, `ThBracketField`, `ThTaxField`) and currency codes (`parameters.currency`) must be typed enums/constants. Never pass raw string literals (`"expense.*"`, `"THB"`, etc.) in stages. Enforced statically by `scripts/check-no-hardcoded-strings.ts`.
+5. **1:1 Stage-to-test mapping**: Never combine multiple stages or categories into a single merged test file. Each calculation stage file in `src/<jurisdiction>/stages/` must have a dedicated 1:1 unit test file in `src/<jurisdiction>/tests/` under 200 lines.
+6. **Minor-unit safety & currency threading**: Caps and percentage calculations (`clampCap`, `resolveCap`) must thread the target `currency` or convert safely using integer minor units (`toMinorUnits` / `fromMinorUnits`). Never execute raw integer checks on major units that can have decimals (e.g. fractional satang/cents).
+7. **Chronological order independence**: Any multi-item rule dependent on dates or birth years (e.g. child bonus born >= 2018) must sort entries chronologically before index-based evaluations, independent of input array ordering.
+8. **Strict input bounds & safe integers**: Validate monetary amounts, rates, and count fields (children, parents, disabled persons). Counts must be non-negative safe integers; sub-counts (e.g. 2nd+ child bonus) must be validated or clamped against total counts (`Math.min(bonus, Math.max(0, count - 1))`).
+9. **Documentation (TSDoc)**: Every exported function, type, and rule must carry a concise TSDoc comment detailing **Purpose**, **Math**, **Units** (major vs integer minor units), **Throws**, and statutory citation (`@statute`).
+10. **Statutory reference cross-validation**: All statutory calculators must be cross-validated against official reference sources or government-recognized filing calculators (e.g. Raidaai for Thai PIT ภ.ง.ด. 90/91) across regular, edge, and combined test cases before submitting.
 
 ## Agent skills
 
