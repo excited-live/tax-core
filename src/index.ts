@@ -1,8 +1,37 @@
-/**
- * @excited-live/tax — placeholder entry point.
- *
- * The tax engine lands in follow-up PRs. This file only gives the toolchain
- * (typecheck, build, package checks) a real entry to work on.
- */
+export {
+	type BracketEvaluationResult,
+	type BracketSlice,
+	evaluateBrackets,
+	type TaxBracket,
+} from "./core/brackets"
 
-export {}
+export {
+	type ClampedAmount,
+	clampCap,
+} from "./core/caps"
+export {
+	applyPercentage,
+	CURRENCIES,
+	type CurrencyCode,
+	type CurrencyInfo,
+	fromMinorUnits,
+	getCurrencyPrecision,
+	type Money,
+	money,
+	type RoundingMode,
+	roundHalfUp,
+	type StandardCurrencyCode,
+	TaxValidationError,
+	thb,
+	toMinorUnits,
+	usd,
+	type ValidateAmountOptions,
+	validateMonetaryAmount,
+} from "./core/money"
+
+export {
+	calculateTax,
+	type JurisdictionCode,
+	type TaxResult,
+	type TaxSystem,
+} from "./core/system"
