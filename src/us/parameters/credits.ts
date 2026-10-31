@@ -19,7 +19,13 @@ export interface UsCreditsParameters {
 	readonly careBaseRate: number
 	readonly careFloorRate: number
 	readonly carePhaseoutAgiThreshold: number
+	readonly carePhaseoutStepAgi: number
+	readonly carePhaseoutStepRate: number
 	readonly aotcMaxPerStudent: number
+	readonly aotcTier1MaxExpense: number
+	readonly aotcTier1Rate: number
+	readonly aotcTier2MaxExpense: number
+	readonly aotcTier2Rate: number
 	readonly aotcRefundableRate: number
 	readonly aotcPhaseoutMin: Record<UsFilingStatus, number>
 	readonly aotcPhaseoutMax: Record<UsFilingStatus, number>
@@ -53,7 +59,13 @@ export const US_2026_CREDITS: UsCreditsParameters = {
 	careBaseRate: 0.35,
 	careFloorRate: 0.2,
 	carePhaseoutAgiThreshold: 15_000,
+	carePhaseoutStepAgi: 2_000,
+	carePhaseoutStepRate: 0.01,
 	aotcMaxPerStudent: 2_500,
+	aotcTier1MaxExpense: 2_000,
+	aotcTier1Rate: 1.0,
+	aotcTier2MaxExpense: 2_000,
+	aotcTier2Rate: 0.25,
 	aotcRefundableRate: 0.4,
 	aotcPhaseoutMin: {
 		single: 80_000,

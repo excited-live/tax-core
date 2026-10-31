@@ -2,6 +2,7 @@ import { fromMinorUnits, toMinorUnits, usd } from "../../core/money"
 import type { US_2026_PARAMETERS } from "../parameters"
 import type { UsFicaBreakdown, UsFilingStatus, UsIncomeInput } from "../types"
 import { UsPayrollField } from "../types/fields"
+import { calculateNetSelfEmploymentEarnings } from "./se"
 
 export interface UsFicaResult {
 	readonly totalFicaCents: number
@@ -40,9 +41,9 @@ export function calculateUsFica(
 	const ssTaxCents = Math.round(ssWages * params.payroll.ficaSocialSecurityRate * 100)
 	const medTaxCents = Math.round(w2 * params.payroll.ficaMedicareRate * 100)
 
-	const seSubject = Math.max(
-		0,
-		(income.selfEmploymentNetEarnings ?? 0) * params.payroll.seNetEarningsFactor,
+	const seSubject = calculateNetSelfEmploymentEarnings(
+		income.selfEmploymentNetEarnings,
+		params.payroll.seNetEarningsFactor,
 	)
 	const combinedEarned = w2 + seSubject
 	const threshold = params.payroll.additionalMedicareThresholds[filingStatus]

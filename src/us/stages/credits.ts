@@ -4,6 +4,7 @@ import type { UsCreditsBreakdown, UsTaxInput } from "../types"
 import { calculateUsChildCredits } from "./credits-child"
 import { calculateUsEitc } from "./credits-eitc"
 import { calculateUsOtherCredits } from "./credits-other"
+import { calculateNetSelfEmploymentEarnings } from "./se"
 
 export interface UsCreditsResult {
 	readonly allowedNonRefundableCents: number
@@ -25,9 +26,9 @@ export function calculateUsCredits(
 	const agiDollars = fromMinorUnits(agiCents, params.currency)
 	const magiDollars = input.magi ?? agiDollars
 	const w2 = Math.max(0, input.income.w2Wages ?? 0)
-	const se = Math.max(
-		0,
-		(input.income.selfEmploymentNetEarnings ?? 0) * params.payroll.seNetEarningsFactor,
+	const se = calculateNetSelfEmploymentEarnings(
+		input.income.selfEmploymentNetEarnings,
+		params.payroll.seNetEarningsFactor,
 	)
 	const earnedDollars = w2 + se
 	const invDollars =

@@ -11,6 +11,18 @@ export interface UsScheduleSeResult {
 }
 
 /**
+ * Calculates net earnings from self-employment subject to SECA/FICA tax (IRC § 1402(a)).
+ *
+ * @statute IRC § 1402(a)
+ */
+export function calculateNetSelfEmploymentEarnings(
+	earnings: number | undefined,
+	seNetEarningsFactor: number,
+): number {
+	return Math.max(0, (earnings ?? 0) * seNetEarningsFactor)
+}
+
+/**
  * Computes Schedule SE Self-Employment Tax (SECA).
  *
  * @statute IRC § 1401, § 1402
@@ -21,7 +33,7 @@ export function calculateUsScheduleSe(
 ): UsScheduleSeResult {
 	const rawNetEarnings = Math.max(0, income.selfEmploymentNetEarnings ?? 0)
 	const factor = params.payroll.seNetEarningsFactor
-	const subjectAmount = rawNetEarnings * factor
+	const subjectAmount = calculateNetSelfEmploymentEarnings(rawNetEarnings, factor)
 	const applies = subjectAmount >= params.payroll.seThresholdFloor
 
 	const w2Dollars = Math.max(0, income.w2Wages ?? 0)

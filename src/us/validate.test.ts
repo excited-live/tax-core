@@ -9,12 +9,26 @@ describe("US Input Validation", () => {
 			validateUsInput({
 				taxYear: 2026,
 				filingStatus: "single",
-				income: {},
+				income: { w2Wages: 50_000, selfEmploymentNetEarnings: 10_000 },
+				withholding: 5_000,
+				amtPreferences: 1_000,
+				credits: {
+					qualifyingChildrenForChildTaxCredit: 2,
+					otherDependents: 1,
+					eitcQualifyingChildren: 2,
+					eitcInvestmentIncome: 1_000,
+					qualifyingIndividualsForCare: 1,
+					childAndDependentCareExpenses: 2_000,
+					foreignTaxCredit: 500,
+					customNonRefundableCredits: 200,
+					customRefundableCredits: 100,
+					educationStudents: [{ type: "aotc", qualifiedExpenses: 3_000 }],
+				},
 			}),
 		).not.toThrow()
 	})
 
-	it("rejects unsupported tax years", () => {
+	it("rejects unsupported tax years and invalid filing statuses", () => {
 		expect(() =>
 			validateUsInput({
 				taxYear: 2025,
@@ -22,13 +36,125 @@ describe("US Input Validation", () => {
 				income: {},
 			}),
 		).toThrow(TaxValidationError)
-	})
 
-	it("rejects invalid filing statuses", () => {
 		expect(() =>
 			validateUsInput({
 				filingStatus: "invalid_status" as unknown as UsFilingStatus,
 				income: {},
+			}),
+		).toThrow(TaxValidationError)
+	})
+
+	it("rejects negative amounts or NaN/Infinity for income and withholding", () => {
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: { w2Wages: -100 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: { selfEmploymentNetEarnings: Number.NaN },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				withholding: -50,
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				amtPreferences: -10,
+			}),
+		).toThrow(TaxValidationError)
+	})
+
+	it("rejects invalid credit inputs, non-integer counts, and negative expenses", () => {
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { qualifyingChildrenForChildTaxCredit: 1.5 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { otherDependents: -1 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { eitcQualifyingChildren: -1 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { eitcInvestmentIncome: -500 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { qualifyingIndividualsForCare: 2.2 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { childAndDependentCareExpenses: -1_000 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { foreignTaxCredit: -200 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { customNonRefundableCredits: -50 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { customRefundableCredits: -50 },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { educationStudents: [{ type: "aotc", qualifiedExpenses: -100 }] },
 			}),
 		).toThrow(TaxValidationError)
 	})
