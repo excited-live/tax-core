@@ -35,5 +35,20 @@
 			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["**/*.test.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noExcessiveLinesPerFile": {
+							"level": "error",
+							"options": { "maxLines": 200, "skipBlankLines": true }
+						}
+					}
+				}
+			}
+		}
+	],
 	"assist": { "actions": { "source": { "organizeImports": "on" } } }
 }

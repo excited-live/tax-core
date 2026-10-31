@@ -55,7 +55,7 @@
 	},
 	"scripts": {
 		"build": "tsdown",
-		"test": "bun test --coverage",
+		"test": "bun test --coverage --coverage-reporter=lcov --coverage-reporter=text && bun run scripts/check-coverage.ts",
 		"typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
 		"lint": "biome ci --error-on-warnings .",
 		"format": "biome check --write .",
