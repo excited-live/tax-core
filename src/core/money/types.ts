@@ -1,5 +1,5 @@
 import type { CurrencyCode } from "./currency"
-import { validateMonetaryAmount } from "./validate"
+import { type ValidateAmountOptions, validateMonetaryAmount } from "./validate"
 
 /**
  * Branded nominal type representing a monetary value in a specific currency.
@@ -15,15 +15,17 @@ export type Money<C extends CurrencyCode = CurrencyCode> = number & {
  * @param amount Numerical amount in major units.
  * @param _currency Currency code tag.
  * @param field Diagnostic field name.
+ * @param options Validation options.
  * @returns Branded Money value.
- * @throws {TaxValidationError} if amount is NaN, infinite, or negative.
+ * @throws {TaxValidationError} if amount is NaN, infinite, or negative without allowNegative.
  */
 export function money<C extends CurrencyCode>(
 	amount: number,
 	_currency?: C,
 	field = "amount",
+	options?: ValidateAmountOptions,
 ): Money<C> {
-	validateMonetaryAmount(amount, field)
+	validateMonetaryAmount(amount, field, options)
 	return amount as Money<C>
 }
 
@@ -32,11 +34,16 @@ export function money<C extends CurrencyCode>(
  *
  * @param amount Amount in Baht.
  * @param field Diagnostic field name.
+ * @param options Validation options.
  * @returns Branded Money<"THB"> value.
- * @throws {TaxValidationError} if amount is NaN, infinite, or negative.
+ * @throws {TaxValidationError} if amount is NaN, infinite, or negative without allowNegative.
  */
-export function thb(amount: number, field = "amount"): Money<"THB"> {
-	validateMonetaryAmount(amount, field)
+export function thb(
+	amount: number,
+	field = "amount",
+	options?: ValidateAmountOptions,
+): Money<"THB"> {
+	validateMonetaryAmount(amount, field, options)
 	return amount as Money<"THB">
 }
 
@@ -45,10 +52,15 @@ export function thb(amount: number, field = "amount"): Money<"THB"> {
  *
  * @param amount Amount in Dollars.
  * @param field Diagnostic field name.
+ * @param options Validation options.
  * @returns Branded Money<"USD"> value.
- * @throws {TaxValidationError} if amount is NaN, infinite, or negative.
+ * @throws {TaxValidationError} if amount is NaN, infinite, or negative without allowNegative.
  */
-export function usd(amount: number, field = "amount"): Money<"USD"> {
-	validateMonetaryAmount(amount, field)
+export function usd(
+	amount: number,
+	field = "amount",
+	options?: ValidateAmountOptions,
+): Money<"USD"> {
+	validateMonetaryAmount(amount, field, options)
 	return amount as Money<"USD">
 }
