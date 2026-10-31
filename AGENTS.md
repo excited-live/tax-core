@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Instructions for AI coding agents in `excited-live/tax-core` (`@excited-live/tax` on npm).
+Instructions for AI coding agents in `trajectonomics-lab/tax-core` (`@trajectonomics/tax` on npm).
 
 ## Rules
 
@@ -30,7 +30,7 @@ When implementing statutory rules (e.g. Thailand PIT, US Federal):
 
 ### Issue tracker
 
-GitHub Issues in `excited-live/tax-core`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+GitHub Issues in `trajectonomics-lab/tax-core`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
