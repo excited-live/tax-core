@@ -15,9 +15,22 @@ export type RoundingMode = "half-up" | "floor" | "ceil"
  */
 export function roundHalfUp(value: number): number {
 	if (value < 0) {
-		return -Math.round(Math.abs(value))
+		const res = -Math.round(Math.abs(value))
+		return res + 0
 	}
-	return Math.round(value)
+	return Math.round(value) + 0
+}
+
+function parseRateRational(rate: number): { num: bigint; den: bigint } {
+	const rateStr = rate.toString().includes("e")
+		? rate.toFixed(10).replace(/\.?0+$/, "")
+		: rate.toString()
+	const parts = rateStr.split(".")
+	const decimals = parts[1] ? parts[1].length : 0
+	return {
+		num: BigInt(parts.join("")),
+		den: 10n ** BigInt(decimals),
+	}
 }
 
 /**
@@ -44,11 +57,7 @@ export function applyPercentage(
 	validateIntegerMinorUnits(minorUnits, "minorUnits", options)
 	validateRate(rate, "rate")
 
-	const rateStr = rate.toString()
-	const parts = rateStr.split(".")
-	const decimals = parts[1] ? parts[1].length : 0
-	const den = 10n ** BigInt(decimals)
-	const num = BigInt(parts.join(""))
+	const { num, den } = parseRateRational(rate)
 	const m = BigInt(minorUnits)
 	const prod = m * num
 
@@ -62,5 +71,5 @@ export function applyPercentage(
 		result = prod >= 0n ? (prod * 2n + den) / (den * 2n) : (prod * 2n - den) / (den * 2n)
 	}
 
-	return Number(result)
+	return Number(result) + 0
 }

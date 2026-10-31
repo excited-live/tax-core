@@ -8,6 +8,7 @@ describe("Rounding & percentage application", () => {
 		expect(roundHalfUp(1.5)).toBe(2)
 		expect(roundHalfUp(2.5)).toBe(3)
 		expect(roundHalfUp(-1.5)).toBe(-2)
+		expect(Object.is(roundHalfUp(-0.2), 0)).toBe(true)
 	})
 
 	it("applies statutory percentage in minor units with exact rational math", () => {
@@ -22,6 +23,9 @@ describe("Rounding & percentage application", () => {
 		expect(applyPercentage(170, 0.35, "half-up")).toBe(60)
 		expect(applyPercentage(180, 0.35, "floor")).toBe(63)
 		expect(applyPercentage(100, 0.07, "ceil")).toBe(7)
+
+		// Tiny exponent rate safely handled
+		expect(applyPercentage(1_000_000, 1e-7)).toBe(0)
 
 		// Negative amounts (refund / adjustment) with allowNegative
 		expect(applyPercentage(-100, 0.025, "floor", { allowNegative: true })).toBe(-3)

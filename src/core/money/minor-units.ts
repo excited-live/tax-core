@@ -1,6 +1,10 @@
 import { type CurrencyCode, getCurrencyPrecision } from "./currency"
 import { TaxValidationError } from "./errors"
-import { validateIntegerMinorUnits, validateMonetaryAmount } from "./validate"
+import {
+	type ValidateAmountOptions,
+	validateIntegerMinorUnits,
+	validateMonetaryAmount,
+} from "./validate"
 
 function scaleDecimalString(abs: number, precision: number): number {
 	const factor = 10 ** precision
@@ -24,12 +28,18 @@ function scaleDecimalString(abs: number, precision: number): number {
  * @param amount Amount in major units.
  * @param currency ISO 4217 currency code.
  * @param field Diagnostic field name.
+ * @param options Validation options (e.g. allowNegative for refund balances).
  * @returns Integer minor units.
  * @throws {TaxValidationError} if amount is NaN, infinite, or results in a non-safe integer.
  * @example toMinorUnits(1.14, "USD") // 114 (114 cents)
  */
-export function toMinorUnits(amount: number, currency: CurrencyCode, field = "amount"): number {
-	validateMonetaryAmount(amount, field)
+export function toMinorUnits(
+	amount: number,
+	currency: CurrencyCode,
+	field = "amount",
+	options?: ValidateAmountOptions,
+): number {
+	validateMonetaryAmount(amount, field, options)
 	const precision = getCurrencyPrecision(currency)
 	if (precision === 0) {
 		const rounded = Math.round(amount) + 0
@@ -63,6 +73,7 @@ export function toMinorUnits(amount: number, currency: CurrencyCode, field = "am
  * @param minorUnits Integer minor units.
  * @param currency ISO 4217 currency code.
  * @param field Diagnostic field name.
+ * @param options Validation options (e.g. allowNegative for refund balances).
  * @returns Amount in major units.
  * @throws {TaxValidationError} if minorUnits is not a safe integer.
  * @example fromMinorUnits(1055, "THB") // 10.55
@@ -71,8 +82,9 @@ export function fromMinorUnits(
 	minorUnits: number,
 	currency: CurrencyCode,
 	field = "minorUnits",
+	options?: ValidateAmountOptions,
 ): number {
-	validateIntegerMinorUnits(minorUnits, field)
+	validateIntegerMinorUnits(minorUnits, field, options)
 	const precision = getCurrencyPrecision(currency)
 	if (precision === 0) {
 		return minorUnits + 0

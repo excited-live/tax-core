@@ -11,7 +11,8 @@ export interface ValidateAmountOptions {
 /**
  * Validates a monetary input against numerical boundaries (NaN, Infinity, negative).
  *
- * @param value Number to validate.\n * @param field Diagnostic field name for error reporting.
+ * @param value Number to validate.
+ * @param field Diagnostic field name for error reporting.
  * @param options Validation options.
  * @throws {TaxValidationError} if value is NaN, non-finite, or negative without allowNegative.
  */

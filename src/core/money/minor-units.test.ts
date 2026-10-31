@@ -22,6 +22,13 @@ describe("Minor Unit conversions without floating-point drift", () => {
 		expect(Object.is(fromMinorUnits(-0, "THB"), 0)).toBe(true)
 	})
 
+	it("supports negative amounts when allowNegative option is enabled", () => {
+		expect(toMinorUnits(-1.14, "USD", "amount", { allowNegative: true })).toBe(-114)
+		expect(toMinorUnits(-100, "JPY", "amount", { allowNegative: true })).toBe(-100)
+		expect(fromMinorUnits(-114, "USD", "minorUnits", { allowNegative: true })).toBe(-1.14)
+		expect(fromMinorUnits(-100, "JPY", "minorUnits", { allowNegative: true })).toBe(-100)
+	})
+
 	it("throws TaxValidationError when conversion exceeds safe integer bounds", () => {
 		expect(() => toMinorUnits(1e16, "THB")).toThrow(TaxValidationError)
 		expect(() => toMinorUnits(1e21, "JPY")).toThrow(TaxValidationError)
