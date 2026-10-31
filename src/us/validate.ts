@@ -8,6 +8,13 @@ const VALID_STATUSES: readonly UsFilingStatus[] = [
 	"head_of_household",
 ]
 
+function checkFiniteNumber(field: string, val: number | undefined): void {
+	if (val === undefined) return
+	if (typeof val !== "number" || !Number.isFinite(val)) {
+		throw new TaxValidationError(field, val, "Must be a finite number")
+	}
+}
+
 function checkNonNegative(field: string, val: number | undefined): void {
 	if (val === undefined) return
 	if (typeof val !== "number" || !Number.isFinite(val) || val < 0) {
@@ -37,6 +44,9 @@ function validateCreditsInput(credits: UsTaxInput["credits"]): void {
 	checkNonNegative("customNonRefundableCredits", credits.customNonRefundableCredits)
 	checkNonNegative("customRefundableCredits", credits.customRefundableCredits)
 	for (const student of credits.educationStudents ?? []) {
+		if (!student) {
+			throw new TaxValidationError("educationStudents", student, "Invalid student entry")
+		}
 		checkNonNegative("educationStudent.qualifiedExpenses", student.qualifiedExpenses)
 	}
 }
@@ -58,6 +68,7 @@ export function validateUsInput(input: UsTaxInput): void {
 	checkNonNegative("withholding", input.withholding)
 	checkNonNegative("amtPreferences", input.amtPreferences)
 	checkNonNegative("income.w2Wages", input.income.w2Wages)
-	checkNonNegative("income.selfEmploymentNetEarnings", input.income.selfEmploymentNetEarnings)
+	// Self-employment may be negative for Schedule C net business losses
+	checkFiniteNumber("income.selfEmploymentNetEarnings", input.income.selfEmploymentNetEarnings)
 	validateCreditsInput(input.credits)
 }

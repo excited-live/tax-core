@@ -36,7 +36,8 @@ function calculateEducationCredits(
 					0,
 					Math.min(exp - params.credits.aotcTier1MaxExpense, params.credits.aotcTier2MaxExpense),
 				) * params.credits.aotcTier2Rate
-			rawAotc += (tier1 + tier2) * factor
+			const cappedStudentAotc = Math.min(tier1 + tier2, params.credits.aotcMaxPerStudent)
+			rawAotc += cappedStudentAotc * factor
 		} else {
 			llcExp += Math.max(0, student.qualifiedExpenses)
 		}

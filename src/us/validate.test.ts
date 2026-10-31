@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "../core/money"
-import type { UsFilingStatus } from "./types"
+import type { UsEducationCreditStudent, UsFilingStatus } from "./types"
 import { validateUsInput } from "./validate"
 
 describe("US Input Validation", () => {
@@ -24,6 +24,15 @@ describe("US Input Validation", () => {
 					customRefundableCredits: 100,
 					educationStudents: [{ type: "aotc", qualifiedExpenses: 3_000 }],
 				},
+			}),
+		).not.toThrow()
+	})
+
+	it("accepts legitimate Schedule C self-employment net business loss", () => {
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: { selfEmploymentNetEarnings: -15_000 },
 			}),
 		).not.toThrow()
 	})
@@ -155,6 +164,14 @@ describe("US Input Validation", () => {
 				filingStatus: "single",
 				income: {},
 				credits: { educationStudents: [{ type: "aotc", qualifiedExpenses: -100 }] },
+			}),
+		).toThrow(TaxValidationError)
+
+		expect(() =>
+			validateUsInput({
+				filingStatus: "single",
+				income: {},
+				credits: { educationStudents: [null as unknown as UsEducationCreditStudent] },
 			}),
 		).toThrow(TaxValidationError)
 	})

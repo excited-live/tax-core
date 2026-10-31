@@ -12,7 +12,8 @@ const FORBIDDEN_PATTERNS: Array<{ regex: RegExp; description: string }> = [
 		description: "Hardcoded diagnostic string (use Th*Field enum instead)",
 	},
 	{
-		regex: /"(?:payroll|fica|amt|credits?|deductions?|adjustments?)\.[a-zA-Z0-9_.]+"/,
+		regex:
+			/"(?:payroll|fica|amt|credits?|deductions?|adjustments?|itemized|income)\.[a-zA-Z0-9_.]+"/,
 		description: "Hardcoded US diagnostic string (use Us*Field enum instead)",
 	},
 	{
