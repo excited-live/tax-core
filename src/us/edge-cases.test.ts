@@ -44,8 +44,10 @@ describe("US Federal Tax Engine Edge Cases and Validation", () => {
 		expect(result.grossIncome).toBe(usd(10_000))
 		expect(result.breakdown.allowableDeduction).toBe(usd(16_100))
 		expect(result.taxableIncome).toBe(usd(0))
-		expect(result.totalTax).toBe(usd(0))
-		expect(result.effectiveRate).toBe(0)
+		expect(result.breakdown.regularIncomeTax).toBe(usd(0))
+		// FICA payroll tax on 10,000 W-2 is 7.65% = 765
+		expect(result.totalTax).toBe(usd(765))
+		expect(result.effectiveRate).toBe(0.0765)
 	})
 
 	it("correctly caps preferential taxable income when deductions absorb ordinary and part of preferential", () => {
@@ -67,7 +69,9 @@ describe("US Federal Tax Engine Edge Cases and Validation", () => {
 		expect(result.breakdown.ordinaryTax).toBe(usd(0))
 		// All 13,900 is within 0% preferential tier ($49,450)
 		expect(result.breakdown.preferentialTax).toBe(usd(0))
-		expect(result.totalTax).toBe(usd(0))
+		expect(result.breakdown.regularIncomeTax).toBe(usd(0))
+		// FICA tax: 765
+		expect(result.totalTax).toBe(usd(765))
 	})
 
 	it("throws on invalid withholding amount", () => {
