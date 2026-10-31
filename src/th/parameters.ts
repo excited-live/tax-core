@@ -1,3 +1,4 @@
+import { TH_2026_BRACKETS } from "./parameters-brackets"
 import {
 	TH_2026_FINAL_WITHHOLDING,
 	TH_2026_REAL_ESTATE,
@@ -74,16 +75,7 @@ export const TH_2026_PARAMETERS: ThParameters = {
 			donation1xMaxRate: 0.1,
 		},
 	},
-	brackets: [
-		{ upTo: 150_000, rate: 0.0 },
-		{ upTo: 300_000, rate: 0.05 },
-		{ upTo: 500_000, rate: 0.1 },
-		{ upTo: 750_000, rate: 0.15 },
-		{ upTo: 1_000_000, rate: 0.2 },
-		{ upTo: 2_000_000, rate: 0.25 },
-		{ upTo: 5_000_000, rate: 0.3 },
-		{ upTo: null, rate: 0.35 },
-	],
+	brackets: TH_2026_BRACKETS,
 	minimumGrossTax: {
 		rate: 0.005,
 		incomeThreshold: 60_000,

@@ -6,7 +6,7 @@ import type {
 	ThSeparateSheetBreakdown,
 	ThTaxInput,
 } from "../types"
-import { sumThAmounts } from "./combine"
+import { sumThAmounts } from "../units"
 import { calculateDividendTaxCredit } from "./dividend-credit"
 import { resolveSection40_4 } from "./final-withholding"
 import { calculateRealEstateTransfer } from "./real-estate"
@@ -38,22 +38,25 @@ export interface ThSpecialRegimes {
  * @statute Thailand Revenue Code Sections 40(4), 47 bis, 48(4), 48(5).
  */
 export function resolveSpecialRegimes(input: ThTaxInput): ThSpecialRegimes {
-	const s40_4 = resolveSection40_4(input.income?.section40_4)
-	const dividendTaxCredit = calculateDividendTaxCredit(s40_4.includedDividends, s40_4.corpTaxRate)
+	const section40_4 = resolveSection40_4(input.income?.section40_4)
+	const dividendTaxCredit = calculateDividendTaxCredit(
+		section40_4.includedDividends,
+		section40_4.corpTaxRate,
+	)
 	const separateSheet = calculateSeparateSheet(input.separateSheet)
 	const realEstate = calculateRealEstateTransfer(input.realEstateTransfer)
 	return {
 		regularIncome: buildRegularIncome(input.income, {
 			lumpSum: separateSheet.addedToSection40_1,
-			section40_4: s40_4.includedAmount,
+			section40_4: section40_4.includedAmount,
 			dividendCredit: dividendTaxCredit.credit,
 		}),
 		grossOutsideRegular: sumThAmounts([
-			s40_4.finalWithholding.totalAmount,
+			section40_4.finalWithholding.totalAmount,
 			separateSheet.isEligible ? separateSheet.amount : 0,
 			realEstate.grossTransferValue,
 		]),
-		finalWithholding: s40_4.finalWithholding,
+		finalWithholding: section40_4.finalWithholding,
 		dividendTaxCredit,
 		separateSheet,
 		realEstate,

@@ -17,7 +17,6 @@ export type {
 	ThExpenseElection,
 	ThFilingStatus,
 	ThFinalWithholdingBreakdown,
-	ThFinalWithholdingElection,
 	ThFinalWithholdingSourceBreakdown,
 	ThMinimumGrossTaxBreakdown,
 	ThParentsInput,
@@ -34,3 +33,4 @@ export type {
 	ThSeparateSheetInput,
 	ThTaxInput,
 } from "./types"
+export { ThFinalWithholdingElection } from "./types"

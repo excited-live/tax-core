@@ -7,7 +7,7 @@ const refund = { allowNegative: true }
 const salary = { section40_1: 600_000 }
 const ss = { socialSecurity: 9_000 } // salary-only regular tax = 20,600
 const sheet = { amount: 1_500_000, yearsOfService: 20, lastDailyWage: 2_000 } // tax 23,000
-const estate = { grossTransferValue: 5_000_000, holdingYears: 3 } // tax 47,499.99
+const estate = { grossTransferValue: 5_000_000, holdingYears: 3 } // tax 47,500
 
 describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => {
 	it("keeps final-elected interest out of the brackets (15% withheld at source)", () => {
@@ -108,16 +108,16 @@ describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => 
 
 	it("taxes a real estate transfer separately from the regular schedule", () => {
 		const res = calculateThTax({ realEstateTransfer: estate })
-		expect(res.breakdown.realEstate.tax).toBe(47_499.99)
-		expect(res.totalTax).toBe(thb(47_499.99))
+		expect(res.breakdown.realEstate.tax).toBe(47_500)
+		expect(res.totalTax).toBe(thb(47_500))
 		expect(res.grossIncome).toBe(thb(5_000_000))
-		expect(res.netTaxPayable).toBe(thb(47_499.99))
+		expect(res.netTaxPayable).toBe(thb(47_500))
 	})
 
 	it("combines every regime into one audited liability", () => {
 		// regular: 600k + 80k + 20k credit - 100k - 69k = 531,000 -> 32,150
-		// total = 32,150 + 23,000 + 47,499.99 + 15,000 = 117,649.99
-		// net = total - 15,000 final - 20,000 credit - 5,000 withheld = 77,649.99
+		// total = 32,150 + 23,000 + 47,500 + 15,000 = 117,650
+		// net = total - 15,000 final - 20,000 credit - 5,000 withheld = 77,650
 		const res = calculateThTax({
 			income: {
 				...salary,
@@ -134,13 +134,13 @@ describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => 
 		const b = res.breakdown
 		expect(b.regularTax).toBe(32_150)
 		expect(b.separateSheet.tax).toBe(23_000)
-		expect(b.realEstate.tax).toBe(47_499.99)
+		expect(b.realEstate.tax).toBe(47_500)
 		expect(b.finalWithholding.totalTax).toBe(15_000)
 		expect(b.dividendTaxCredit.credit).toBe(20_000)
-		expect(b.totalCombinedTax).toBe(117_649.99)
-		expect(res.totalTax).toBe(thb(117_649.99))
-		expect(res.netTaxPayable).toBe(thb(77_649.99))
-		expect(b.netTaxPayable).toBe(77_649.99)
+		expect(b.totalCombinedTax).toBe(117_650)
+		expect(res.totalTax).toBe(thb(117_650))
+		expect(res.netTaxPayable).toBe(thb(77_650))
+		expect(b.netTaxPayable).toBe(77_650)
 		expect(res.grossIncome).toBe(thb(7_300_000))
 		expect(res.taxableIncome).toBe(thb(531_000))
 	})

@@ -92,6 +92,16 @@ describe("Section 48(5) Separate Sheet (ใบแนบ ภ.ง.ด.90/91)", () 
 		expect(res.tax).toBe(0)
 	})
 
+	it("rejects wage or service years whose scaled satang amounts exceed safe integers", () => {
+		const ok = { amount: 100_000, yearsOfService: 6, lastDailyWage: 500 }
+		expect(() => calculateSeparateSheet({ ...ok, lastDailyWage: 1e13 })).toThrow(TaxValidationError)
+		for (const years of [2 ** 52, 1e11]) {
+			expect(() => calculateSeparateSheet({ ...ok, yearsOfService: years })).toThrow(
+				TaxValidationError,
+			)
+		}
+	})
+
 	it("rejects invalid amounts, wages, and years of service", () => {
 		const ok = { amount: 100_000, yearsOfService: 6, lastDailyWage: 500 }
 		expect(() => calculateSeparateSheet({ ...ok, amount: -1 })).toThrow(TaxValidationError)

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "./errors"
 import {
+	multiplySafeInteger,
 	validateIntegerMinorUnits,
 	validateMonetaryAmount,
 	validateRate,
@@ -39,5 +40,12 @@ describe("Boundary validation and TaxValidationError", () => {
 		expect(() => validateSafeIntegerCount(2.5, "years")).toThrow(TaxValidationError)
 		expect(() => validateSafeIntegerCount(2 ** 53, "years")).toThrow(TaxValidationError)
 		expect(() => validateSafeIntegerCount(Number.NaN, "years")).toThrow(TaxValidationError)
+	})
+
+	it("multiplies safe integers and rejects unsafe products", () => {
+		expect(multiplySafeInteger(7_000_00, 20, "years")).toBe(14_000_000)
+		expect(multiplySafeInteger(0, 2 ** 52, "years")).toBe(0)
+		expect(() => multiplySafeInteger(7_000_00, 2 ** 52, "years")).toThrow(TaxValidationError)
+		expect(() => multiplySafeInteger(2 ** 40, 2 ** 40, "wage")).toThrow(/wage/)
 	})
 })

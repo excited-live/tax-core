@@ -78,6 +78,7 @@ export function applyPercentage(
 /**
  * Applies the statutory gross-up ratio `rate / (1 - rate)` to an integer minor unit amount.
  *
+ * Purpose: Recovers the underlying tax from a net amount (e.g. a dividend tax credit).
  * Math: Exact BigInt rational `(minorUnits * num) / (den - num)` where `rate = num / den`,
  * rounded half-up (away from zero) so ties such as 0.5 satang never suffer binary float drift.
  * Units: Input and output are integer minor units (satang/cents).
@@ -86,6 +87,7 @@ export function applyPercentage(
  * @param rate Underlying rate ratio in [0, 1) (e.g. 0.2 for a 20% corporate tax rate).
  * @returns Gross-up amount (`minorUnits * rate / (1 - rate)`) in integer minor units.
  * @throws {TaxValidationError} if minorUnits is not a non-negative safe integer or rate is outside [0, 1).
+ * @statute Jurisdiction-neutral; Thailand Revenue Code Section 47 bis is the first consumer.
  * @example applyGrossUp(100_000, 0.2) // 25_000 (1,000.00 -> 250.00 credit at 20%)
  */
 export function applyGrossUp(minorUnits: number, rate: number): number {

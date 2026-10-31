@@ -62,12 +62,8 @@ _Avoid_: Tax exemption
 The Section 48(4) separate computation for inherited, gifted, or sold property: gross transfer value less a holding-year statutory expense (92% at 1 year down to 50% at 8+), averaged over the holding years, taxed on the regular brackets, multiplied back by the holding years, and clamped at 20% of the gross transfer value.
 _Avoid_: Capital gains tax
 
-**Minimum Gross Tax**:
-The alternative tax computation mandated by Section 48(2) of the Thailand Revenue Code imposing a 0.5% tax on non-employment income (Sections 40(2)–40(8)) if it exceeds 120,000 THB and computed gross tax exceeds 5,000 THB, payable if higher than progressive tax.
-_Avoid_: Flat tax, alternative minimum tax
-
 **Dividend Tax Credit**:
-The Section 47 bis gross-up and tax credit granted when a taxpayer elects to include dividends from Thai corporate entities in regular progressive calculation to recover underlying corporate income tax.
+The Section 47 bis gross-up and tax credit granted when a taxpayer elects to include dividends from Thai corporate entities in regular progressive calculation to recover underlying corporate income tax. The grossed-up amount (dividend + credit) stays in Section 40(4) assessable income and the credit offsets tax payable.
 _Avoid_: Dividend deduction
 
 **Minimum Gross Tax**:

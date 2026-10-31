@@ -1,3 +1,4 @@
+import { TH_2026_BRACKETS } from "./parameters-brackets"
 import type { ThParameters } from "./parameters-types"
 
 /**
@@ -14,6 +15,7 @@ export const TH_2026_FINAL_WITHHOLDING: ThParameters["finalWithholding"] = {
 
 /**
  * Section 48(5) separate sheet parameters for Tax Year 2026: exemption, expenses, and schedule.
+ * The schedule is the Section 48(1) ladder without its 0% tier (same upper bounds and rates).
  *
  * @statute Thailand Revenue Code Section 48(5), Section 42(1).
  */
@@ -23,15 +25,7 @@ export const TH_2026_SEPARATE_SHEET: ThParameters["separateSheet"] = {
 	exemptionCeiling: 600_000,
 	expensePerYearOfService: 7_000,
 	remainderExpenseRate: 0.5,
-	brackets: [
-		{ upTo: 300_000, rate: 0.05 },
-		{ upTo: 500_000, rate: 0.1 },
-		{ upTo: 750_000, rate: 0.15 },
-		{ upTo: 1_000_000, rate: 0.2 },
-		{ upTo: 2_000_000, rate: 0.25 },
-		{ upTo: 5_000_000, rate: 0.3 },
-		{ upTo: null, rate: 0.35 },
-	],
+	brackets: TH_2026_BRACKETS.filter((bracket) => bracket.rate > 0),
 }
 
 /**

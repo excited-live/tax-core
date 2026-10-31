@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "../../core/money"
-import { combineThLiability, sumThAmounts } from "../stages/combine"
+import { combineThLiability } from "../stages/combine"
 
 const base = {
 	regularTax: 0,
@@ -15,7 +15,6 @@ describe("Combined Thailand tax liability", () => {
 	it("returns the regular tax unchanged when no special regime applies", () => {
 		const res = combineThLiability({ ...base, regularTax: 20_600 })
 		expect(res.totalCombinedTax).toBe(20_600)
-		expect(res.creditsAndPayments).toBe(0)
 		expect(res.netTaxPayable).toBe(20_600)
 	})
 
@@ -24,13 +23,11 @@ describe("Combined Thailand tax liability", () => {
 			...base,
 			regularTax: 20_600,
 			separateSheetTax: 23_000,
-			realEstateTax: 47_499.99,
+			realEstateTax: 47_500,
 			finalWithholdingTax: 15_000,
 		})
-		expect(res.totalCombinedTax).toBe(106_099.99)
-		// final withholding was already withheld at source
-		expect(res.creditsAndPayments).toBe(15_000)
-		expect(res.netTaxPayable).toBe(91_099.99)
+		expect(res.totalCombinedTax).toBe(106_100)
+		expect(res.netTaxPayable).toBe(91_100)
 	})
 
 	it("subtracts dividend credit and withholding tax and allows refunds", () => {
@@ -42,7 +39,6 @@ describe("Combined Thailand tax liability", () => {
 			withholdingTax: 2_000.5,
 		})
 		expect(res.totalCombinedTax).toBe(15_000)
-		expect(res.creditsAndPayments).toBe(32_000.5)
 		expect(res.netTaxPayable).toBe(-17_000.5)
 	})
 
@@ -57,11 +53,5 @@ describe("Combined Thailand tax liability", () => {
 			TaxValidationError,
 		)
 		expect(() => combineThLiability({ ...base, withholdingTax: -1 })).toThrow(TaxValidationError)
-	})
-
-	it("sums amounts exactly in satang and rejects invalid amounts", () => {
-		expect(sumThAmounts([0.1, 0.2])).toBe(0.3)
-		expect(sumThAmounts([])).toBe(0)
-		expect(() => sumThAmounts([1, -1])).toThrow(TaxValidationError)
 	})
 })

@@ -38,12 +38,12 @@ export type {
 	ThRealEstateBreakdown,
 	ThSeparateSheetBreakdown,
 } from "./special-breakdown"
-export { ThSpecialRegimeField } from "./special-fields"
-export type {
+export { ThCombineField, ThSpecialRegimeField } from "./special-fields"
+export {
 	ThFinalWithholdingElection,
-	ThRealEstateTransferInput,
-	ThSection40_4Dividend,
-	ThSection40_4Input,
-	ThSection40_4Source,
-	ThSeparateSheetInput,
+	type ThRealEstateTransferInput,
+	type ThSection40_4Dividend,
+	type ThSection40_4Input,
+	type ThSection40_4Source,
+	type ThSeparateSheetInput,
 } from "./special-input"

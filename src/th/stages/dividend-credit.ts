@@ -1,35 +1,12 @@
-import {
-	applyGrossUp,
-	fromMinorUnits,
-	TaxValidationError,
-	toMinorUnits,
-	validateMonetaryAmount,
-} from "../../core/money"
-import { TH_2026_PARAMETERS } from "../parameters"
-import { type ThDividendTaxCreditBreakdown, ThSpecialRegimeField } from "../types"
-
-/**
- * Validates a Thai corporate income tax rate used for the Section 47 bis gross-up.
- *
- * Math: Requires `0 <= rate < 1` so `rate / (1 - rate)` is finite.
- * Units: Rate ratio (0.2 = 20%).
- * Throws: TaxValidationError if rate is NaN, non-finite, negative, or at least 1.
- *
- * @statute Thailand Revenue Code Section 47 bis.
- */
-export function validateCorpTaxRate(rate: number): void {
-	if (!Number.isFinite(rate) || rate < 0 || rate >= 1) {
-		throw new TaxValidationError(
-			ThSpecialRegimeField.CorpTaxRate,
-			rate,
-			"Corporate tax rate must be finite and satisfy 0 <= rate < 1",
-		)
-	}
-}
+import { applyGrossUp, validateMonetaryAmount } from "../../core/money"
+import { ThCombineField, type ThDividendTaxCreditBreakdown, ThSpecialRegimeField } from "../types"
+import { fromSatang, toSatang } from "../units"
+import { validateCorpTaxRate } from "../validate"
 
 /**
  * Calculates the Section 47 bis dividend tax credit for dividends included in regular income.
  *
+ * Purpose: Recovers the corporate tax already paid on dividends taxed again in the regular schedule.
  * Math: credit = dividend * corpTaxRate / (1 - corpTaxRate), exact in satang and rounded half-up.
  * The grossed-up amount (dividend + credit) is assessable; the credit offsets tax payable.
  * Units: Inputs and outputs in THB major units; arithmetic in integer satang.
@@ -54,14 +31,13 @@ export function calculateDividendTaxCredit(
 		}
 	}
 	validateCorpTaxRate(corpTaxRate)
-	const currency = TH_2026_PARAMETERS.currency
-	const minorDividend = toMinorUnits(includedDividends, currency, ThSpecialRegimeField.Dividends)
-	const minorCredit = applyGrossUp(minorDividend, corpTaxRate)
+	const dividendSatang = toSatang(includedDividends, ThSpecialRegimeField.Dividends)
+	const creditSatang = applyGrossUp(dividendSatang, corpTaxRate)
 	return {
 		isApplicable: true,
 		dividendAmount: includedDividends,
 		corpTaxRate,
-		credit: fromMinorUnits(minorCredit, currency, ThSpecialRegimeField.DividendTaxCredit),
-		grossedUpAmount: fromMinorUnits(minorDividend + minorCredit, currency),
+		credit: fromSatang(creditSatang, ThCombineField.DividendTaxCredit),
+		grossedUpAmount: fromSatang(dividendSatang + creditSatang),
 	}
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "../../core/money"
-import { calculateDividendTaxCredit, validateCorpTaxRate } from "../stages/dividend-credit"
+import { calculateDividendTaxCredit } from "../stages/dividend-credit"
 
 describe("Section 47 bis Dividend Tax Credit", () => {
 	it("grosses up a 100,000 THB dividend at 20% corporate tax to a 25,000 THB credit", () => {
@@ -39,9 +39,9 @@ describe("Section 47 bis Dividend Tax Credit", () => {
 
 	it("rejects invalid corporate tax rates and dividends", () => {
 		for (const bad of [-0.1, 1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
-			expect(() => validateCorpTaxRate(bad)).toThrow(TaxValidationError)
+			expect(() => calculateDividendTaxCredit(100, bad)).toThrow(TaxValidationError)
 		}
-		expect(() => validateCorpTaxRate(0.999)).not.toThrow()
+		expect(() => calculateDividendTaxCredit(100, 0.999)).not.toThrow()
 		expect(() => calculateDividendTaxCredit(-1, 0.2)).toThrow(TaxValidationError)
 		expect(() => calculateDividendTaxCredit(100, 1)).toThrow(TaxValidationError)
 	})

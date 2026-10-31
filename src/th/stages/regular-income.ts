@@ -1,6 +1,6 @@
-import { fromMinorUnits, toMinorUnits, validateMonetaryAmount } from "../../core/money"
-import { TH_2026_PARAMETERS } from "../parameters"
+import { validateMonetaryAmount } from "../../core/money"
 import { ThAssessableField, type ThAssessableIncomeInput } from "../types"
+import { fromSatang, toSatang } from "../units"
 
 /** Special-regime amounts folded into the regular schedule. Units: THB major units. */
 export interface ThSpecialIncome {
@@ -31,18 +31,15 @@ export function buildRegularIncome(
 ): ThAssessableIncomeInput {
 	const declared = income?.section40_1 ?? 0
 	validateMonetaryAmount(declared, ThAssessableField.Section40_1)
-	const currency = TH_2026_PARAMETERS.currency
-	const minor = (value: number, field: ThAssessableField): number =>
-		toMinorUnits(value, currency, field)
 	const section40_1 =
-		minor(declared, ThAssessableField.Section40_1) +
-		minor(special.lumpSum, ThAssessableField.Section40_1)
+		toSatang(declared, ThAssessableField.Section40_1) +
+		toSatang(special.lumpSum, ThAssessableField.Section40_1)
 	const section40_4 =
-		minor(special.section40_4, ThAssessableField.Section40_4) +
-		minor(special.dividendCredit, ThAssessableField.Section40_4)
+		toSatang(special.section40_4, ThAssessableField.Section40_4) +
+		toSatang(special.dividendCredit, ThAssessableField.Section40_4)
 	return {
 		...income,
-		section40_1: fromMinorUnits(section40_1, currency),
-		section40_4: fromMinorUnits(section40_4, currency),
+		section40_1: fromSatang(section40_1),
+		section40_4: fromSatang(section40_4),
 	}
 }

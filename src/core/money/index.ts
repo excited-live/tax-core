@@ -10,6 +10,7 @@ import { fromMinorUnits, toMinorUnits } from "./minor-units"
 import { applyGrossUp, applyPercentage, type RoundingMode, roundHalfUp } from "./rounding"
 import { type Money, money, thb, usd } from "./types"
 import {
+	multiplySafeInteger,
 	type ValidateAmountOptions,
 	validateIntegerMinorUnits,
 	validateMonetaryAmount,
@@ -27,6 +28,7 @@ export {
 	getCurrencyPrecision,
 	type Money,
 	money,
+	multiplySafeInteger,
 	type RoundingMode,
 	roundHalfUp,
 	type StandardCurrencyCode,
