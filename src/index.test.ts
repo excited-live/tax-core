@@ -15,6 +15,8 @@ import {
 	usd,
 	validateMonetaryAmount,
 } from "./index"
+import * as th from "./th/index"
+import * as us from "./us/index"
 
 describe("@excited-live/tax public index exports", () => {
 	it("exports all expected core utilities and functions", () => {
@@ -32,5 +34,10 @@ describe("@excited-live/tax public index exports", () => {
 		expect(typeof clampCap).toBe("function")
 		expect(typeof evaluateBrackets).toBe("function")
 		expect(typeof calculateTax).toBe("function")
+	})
+
+	it("exports valid subpath entries for th and us", () => {
+		expect(typeof th).toBe("object")
+		expect(typeof us).toBe("object")
 	})
 })

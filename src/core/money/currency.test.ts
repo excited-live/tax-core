@@ -11,11 +11,13 @@ describe("ISO 4217 Currency Precision Table", () => {
 		expect(CURRENCIES.GBP.precision).toBe(2)
 	})
 
-	it("retrieves currency precision via helper", () => {
+	it("retrieves currency precision via helper and ignores prototype keys", () => {
 		expect(getCurrencyPrecision("THB")).toBe(2)
 		expect(getCurrencyPrecision("USD")).toBe(2)
 		expect(getCurrencyPrecision("JPY")).toBe(0)
 		expect(getCurrencyPrecision("KWD")).toBe(3)
 		expect(getCurrencyPrecision("UNKNOWN")).toBe(2)
+		expect(getCurrencyPrecision("toString")).toBe(2)
+		expect(getCurrencyPrecision("constructor")).toBe(2)
 	})
 })

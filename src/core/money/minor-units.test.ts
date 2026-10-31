@@ -17,8 +17,14 @@ describe("Minor Unit conversions without floating-point drift", () => {
 		expect(Number.isNaN(toMinorUnits(1e-7, "THB"))).toBe(false)
 	})
 
+	it("normalizes -0 to positive 0", () => {
+		expect(Object.is(toMinorUnits(-0, "THB"), 0)).toBe(true)
+		expect(Object.is(fromMinorUnits(-0, "THB"), 0)).toBe(true)
+	})
+
 	it("throws TaxValidationError when conversion exceeds safe integer bounds", () => {
 		expect(() => toMinorUnits(1e16, "THB")).toThrow(TaxValidationError)
+		expect(() => toMinorUnits(1e21, "JPY")).toThrow(TaxValidationError)
 	})
 
 	it("converts 0-decimal and 3-decimal currencies correctly", () => {

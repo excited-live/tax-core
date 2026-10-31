@@ -2,6 +2,19 @@ import { type CurrencyCode, getCurrencyPrecision } from "./currency"
 import { TaxValidationError } from "./errors"
 import { validateIntegerMinorUnits, validateMonetaryAmount } from "./validate"
 
+function scaleDecimalString(abs: number, precision: number): number {
+	const factor = 10 ** precision
+	if (String(abs).includes("e")) {
+		return abs * factor
+	}
+	const parts = String(abs).split(".")
+	const intPart = parts[0] ?? "0"
+	const decPart = (parts[1] ?? "").padEnd(precision, "0")
+	const whole = intPart + decPart.slice(0, precision)
+	const fraction = decPart.slice(precision)
+	return Number(whole + (fraction.length > 0 ? `.${fraction}` : ""))
+}
+
 /**
  * Converts a major-unit monetary amount to integer minor units (satang/cent).
  *
@@ -19,27 +32,22 @@ export function toMinorUnits(amount: number, currency: CurrencyCode, field = "am
 	validateMonetaryAmount(amount, field)
 	const precision = getCurrencyPrecision(currency)
 	if (precision === 0) {
-		return Math.round(amount)
+		const rounded = Math.round(amount) + 0
+		if (!Number.isSafeInteger(rounded)) {
+			throw new TaxValidationError(
+				field,
+				amount,
+				"Conversion to minor units failed or exceeded safe integer bounds",
+			)
+		}
+		return rounded
 	}
 
-	const factor = 10 ** precision
 	const sign = amount < 0 ? -1 : 1
 	const abs = Math.abs(amount)
-
-	let scaled: number
-	if (String(abs).includes("e")) {
-		scaled = abs * factor
-	} else {
-		const parts = String(abs).split(".")
-		const intPart = parts[0] ?? "0"
-		const decPart = (parts[1] ?? "").padEnd(precision, "0")
-		const whole = intPart + decPart.slice(0, precision)
-		const fraction = decPart.slice(precision)
-		scaled = Number(whole + (fraction.length > 0 ? `.${fraction}` : ""))
-	}
-
-	const result = sign * Math.round(scaled)
-	if (Number.isNaN(result) || !Number.isSafeInteger(result)) {
+	const scaled = scaleDecimalString(abs, precision)
+	const result = sign * Math.round(scaled) + 0
+	if (!Number.isSafeInteger(result)) {
 		throw new TaxValidationError(
 			field,
 			amount,
@@ -67,10 +75,10 @@ export function fromMinorUnits(
 	validateIntegerMinorUnits(minorUnits, field)
 	const precision = getCurrencyPrecision(currency)
 	if (precision === 0) {
-		return minorUnits
+		return minorUnits + 0
 	}
 	const factor = 10 ** precision
 	const sign = minorUnits < 0 ? -1 : 1
 	const absUnits = Math.abs(minorUnits)
-	return sign * Number((absUnits / factor).toFixed(precision))
+	return sign * Number((absUnits / factor).toFixed(precision)) + 0
 }

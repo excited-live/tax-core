@@ -38,7 +38,7 @@ export const CURRENCIES: Record<StandardCurrencyCode, CurrencyInfo> = {
  * @example getCurrencyPrecision("THB") // 2 (1 THB = 100 Satang)
  */
 export function getCurrencyPrecision(currency: CurrencyCode): number {
-	if (currency in CURRENCIES) {
+	if (Object.hasOwn(CURRENCIES, currency)) {
 		return CURRENCIES[currency as StandardCurrencyCode].precision
 	}
 	return 2

@@ -1,19 +1,49 @@
-import { validateMonetaryAmount, validateRate } from "../money"
+import { TaxValidationError, validateMonetaryAmount, validateRate } from "../money"
 import { marginalRateAt } from "./marginal"
 import { computeBracketSlice } from "./slice"
 import type { BracketEvaluationResult, BracketSlice, TaxBracket } from "./types"
 
-/**
- * Validates ordered progressive tax brackets.
- */
+function validateSingleBracket(
+	bracket: TaxBracket,
+	index: number,
+	isLast: boolean,
+	prevBound: number,
+): number {
+	validateRate(bracket.rate, `bracket[${index}].rate`)
+	if (bracket.upTo === null) {
+		if (!isLast) {
+			throw new TaxValidationError(
+				`bracket[${index}].upTo`,
+				bracket.upTo,
+				"Only the final bracket tier may have upTo: null (unbounded)",
+			)
+		}
+		return prevBound
+	}
+	validateMonetaryAmount(bracket.upTo, `bracket[${index}].upTo`)
+	if (!Number.isSafeInteger(bracket.upTo) || bracket.upTo <= prevBound) {
+		throw new TaxValidationError(
+			`bracket[${index}].upTo`,
+			bracket.upTo,
+			`Bracket bound must be a safe integer greater than ${prevBound}`,
+		)
+	}
+	return bracket.upTo
+}
+
 function validateBrackets(brackets: readonly TaxBracket[]): void {
+	if (brackets.length === 0) {
+		throw new TaxValidationError("brackets", brackets, "Bracket list cannot be empty")
+	}
+	let prevBound = 0
 	for (let i = 0; i < brackets.length; i++) {
 		const bracket = brackets[i]
 		if (!bracket) continue
-		validateRate(bracket.rate, `bracket[${i}].rate`)
-		if (bracket.upTo !== null) {
-			validateMonetaryAmount(bracket.upTo, `bracket[${i}].upTo`)
-		}
+		prevBound = validateSingleBracket(bracket, i, i === brackets.length - 1, prevBound)
+	}
+	const last = brackets[brackets.length - 1]
+	if (last && last.upTo !== null) {
+		throw new TaxValidationError("brackets", brackets, "Final bracket tier must have upTo: null")
 	}
 }
 

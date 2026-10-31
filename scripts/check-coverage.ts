@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
 const MIN_COVERAGE_PERCENT = 100
@@ -8,12 +8,35 @@ try {
 	const content = readFileSync(lcovPath, "utf-8")
 	let linesFound = 0
 	let linesHit = 0
+	const coveredFiles = new Set<string>()
 
 	for (const line of content.split("\n")) {
-		if (line.startsWith("LF:")) {
+		if (line.startsWith("SF:")) {
+			coveredFiles.add(line.slice(3).trim())
+		} else if (line.startsWith("LF:")) {
 			linesFound += Number.parseInt(line.slice(3), 10) || 0
 		} else if (line.startsWith("LH:")) {
 			linesHit += Number.parseInt(line.slice(3), 10) || 0
+		}
+	}
+
+	// Verify that every source file containing runtime code is included in coverage
+	const sourceFiles = readdirSync("src", { recursive: true })
+		.filter(
+			(f) =>
+				typeof f === "string" &&
+				f.endsWith(".ts") &&
+				!f.endsWith(".test.ts") &&
+				!f.endsWith(".d.ts"),
+		)
+		.map((f) => `src/${f}`)
+
+	for (const file of sourceFiles) {
+		const fileText = readFileSync(file, "utf-8")
+		const hasRuntimeCode = /(function|class|const|let|var)\s+\w+/.test(fileText)
+		if (hasRuntimeCode && !coveredFiles.has(file)) {
+			console.error(`FAIL: Source file ${file} has runtime code but was never imported/tested!`)
+			process.exit(1)
 		}
 	}
 

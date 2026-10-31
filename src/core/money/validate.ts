@@ -11,8 +11,7 @@ export interface ValidateAmountOptions {
 /**
  * Validates a monetary input against numerical boundaries (NaN, Infinity, negative).
  *
- * @param value Number to validate.
- * @param field Diagnostic field name for error reporting.
+ * @param value Number to validate.\n * @param field Diagnostic field name for error reporting.
  * @param options Validation options.
  * @throws {TaxValidationError} if value is NaN, non-finite, or negative without allowNegative.
  */
@@ -57,10 +56,15 @@ export function validateRate(rate: number, field: string): void {
  *
  * @param minorUnits Integer minor units.
  * @param field Diagnostic field name.
+ * @param options Validation options.
  * @throws {TaxValidationError} if not a safe integer.
  */
-export function validateIntegerMinorUnits(minorUnits: number, field: string): void {
-	validateMonetaryAmount(minorUnits, field)
+export function validateIntegerMinorUnits(
+	minorUnits: number,
+	field: string,
+	options?: ValidateAmountOptions,
+): void {
+	validateMonetaryAmount(minorUnits, field, options)
 	if (!Number.isSafeInteger(minorUnits)) {
 		throw new TaxValidationError(field, minorUnits, "Minor units amount must be a safe integer")
 	}

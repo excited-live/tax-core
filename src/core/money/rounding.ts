@@ -1,4 +1,4 @@
-import { validateIntegerMinorUnits, validateRate } from "./validate"
+import { type ValidateAmountOptions, validateIntegerMinorUnits, validateRate } from "./validate"
 
 /**
  * Supported rounding modes for statutory tax computations.
@@ -21,32 +21,46 @@ export function roundHalfUp(value: number): number {
 }
 
 /**
- * Applies a statutory percentage rate to an integer minor unit amount.
+ * Applies a statutory percentage rate to an integer minor unit amount using exact rational arithmetic.
  *
- * Math: `round(minorUnits * rate)` where `rate` is a ratio (0.05 = 5%), not a percent.
+ * Math: Exact rational scaling via BigInt `(minorUnits * num + modeAdjust) / den`
+ * to eliminate IEEE 754 binary floating-point drift on exact statutory tax rates.
  * Units: Input and output are integer minor units (satang/cents).
  *
  * @param minorUnits Integer minor units amount.
- * @param rate Statutory rate ratio (e.g. 0.05 for 5%).
+ * @param rate Statutory rate ratio (e.g. 0.05 for 5%, 0.35 for 35%).
  * @param rounding Rounding mode (`half-up`, `floor`, or `ceil`).
+ * @param options Validation options (e.g. allowNegative).
  * @returns Computed tax in integer minor units.
  * @throws {TaxValidationError} if minorUnits is not a safe integer or rate is outside [0, 1].
- * @example applyPercentage(10_000, 0.05) // 500 (5.00 THB tax on 100.00 THB)
+ * @example applyPercentage(90, 0.35) // 32 (exact statutory satang calculation)
  */
 export function applyPercentage(
 	minorUnits: number,
 	rate: number,
 	rounding: RoundingMode = "half-up",
+	options?: ValidateAmountOptions,
 ): number {
-	validateIntegerMinorUnits(minorUnits, "minorUnits")
+	validateIntegerMinorUnits(minorUnits, "minorUnits", options)
 	validateRate(rate, "rate")
 
-	const raw = minorUnits * rate
+	const rateStr = rate.toString()
+	const parts = rateStr.split(".")
+	const decimals = parts[1] ? parts[1].length : 0
+	const den = 10n ** BigInt(decimals)
+	const num = BigInt(parts.join(""))
+	const m = BigInt(minorUnits)
+	const prod = m * num
+
+	let result: bigint
 	if (rounding === "floor") {
-		return Math.floor(raw)
+		result = prod >= 0n ? prod / den : (prod - (den - 1n)) / den
+	} else if (rounding === "ceil") {
+		result = prod >= 0n ? (prod + (den - 1n)) / den : prod / den
+	} else {
+		// half-up: away from zero
+		result = prod >= 0n ? (prod * 2n + den) / (den * 2n) : (prod * 2n - den) / (den * 2n)
 	}
-	if (rounding === "ceil") {
-		return Math.ceil(raw)
-	}
-	return roundHalfUp(raw)
+
+	return Number(result)
 }
