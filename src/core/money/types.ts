@@ -15,7 +15,7 @@ export type Money<C extends CurrencyCode = CurrencyCode> = number & {
  * @param amount Numerical amount in major units.
  * @param _currency Currency code tag.
  * @param field Diagnostic field name.
- * @param options Validation options.
+ * @param options Validation options (e.g. allowNegative for refund balances).
  * @returns Branded Money value.
  * @throws {TaxValidationError} if amount is NaN, infinite, or negative without allowNegative.
  */
@@ -34,7 +34,7 @@ export function money<C extends CurrencyCode>(
  *
  * @param amount Amount in Baht.
  * @param field Diagnostic field name.
- * @param options Validation options.
+ * @param options Validation options (e.g. allowNegative for refund balances).
  * @returns Branded Money<"THB"> value.
  * @throws {TaxValidationError} if amount is NaN, infinite, or negative without allowNegative.
  */
@@ -52,7 +52,7 @@ export function thb(
  *
  * @param amount Amount in Dollars.
  * @param field Diagnostic field name.
- * @param options Validation options.
+ * @param options Validation options (e.g. allowNegative for refund balances).
  * @returns Branded Money<"USD"> value.
  * @throws {TaxValidationError} if amount is NaN, infinite, or negative without allowNegative.
  */
