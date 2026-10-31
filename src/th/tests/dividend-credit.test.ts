@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "../../core/money"
 import { calculateDividendTaxCredit } from "../stages/dividend-credit"
+import { ThSpecialRegimeField } from "../types"
 
 describe("Section 47 bis Dividend Tax Credit", () => {
 	it("grosses up a 100,000 THB dividend at 20% corporate tax to a 25,000 THB credit", () => {
@@ -44,5 +45,16 @@ describe("Section 47 bis Dividend Tax Credit", () => {
 		expect(() => calculateDividendTaxCredit(100, 0.999)).not.toThrow()
 		expect(() => calculateDividendTaxCredit(-1, 0.2)).toThrow(TaxValidationError)
 		expect(() => calculateDividendTaxCredit(100, 1)).toThrow(TaxValidationError)
+	})
+
+	it("rejects a credit that overflows safe integers, naming the dividend field", () => {
+		// 1e11 THB = 1e13 satang; credit = 999x = 9.99e15 satang > Number.MAX_SAFE_INTEGER
+		try {
+			calculateDividendTaxCredit(1e11, 0.999)
+			throw new Error("expected TaxValidationError")
+		} catch (error) {
+			expect(error).toBeInstanceOf(TaxValidationError)
+			expect((error as TaxValidationError).field).toBe(ThSpecialRegimeField.Dividends)
+		}
 	})
 })

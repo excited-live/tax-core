@@ -32,12 +32,12 @@ export function calculateDividendTaxCredit(
 	}
 	validateCorpTaxRate(corpTaxRate)
 	const dividendSatang = toSatang(includedDividends, ThSpecialRegimeField.Dividends)
-	const creditSatang = applyGrossUp(dividendSatang, corpTaxRate)
+	const creditSatang = applyGrossUp(dividendSatang, corpTaxRate, ThSpecialRegimeField.Dividends)
 	return {
 		isApplicable: true,
 		dividendAmount: includedDividends,
 		corpTaxRate,
 		credit: fromSatang(creditSatang, ThCombineField.DividendTaxCredit),
-		grossedUpAmount: fromSatang(dividendSatang + creditSatang),
+		grossedUpAmount: fromSatang(dividendSatang + creditSatang, ThCombineField.DividendTaxCredit),
 	}
 }

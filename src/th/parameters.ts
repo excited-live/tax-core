@@ -78,7 +78,7 @@ export const TH_2026_PARAMETERS: ThParameters = {
 	brackets: TH_2026_BRACKETS,
 	minimumGrossTax: {
 		rate: 0.005,
-		incomeThreshold: 60_000,
+		incomeThreshold: 120_000,
 		taxThreshold: 5_000,
 	},
 	finalWithholding: TH_2026_FINAL_WITHHOLDING,

@@ -1,18 +1,15 @@
-import { applyPercentage } from "../../core/money"
 import { TH_2026_PARAMETERS } from "../parameters"
 import {
 	ThAssessableField,
 	type ThFinalWithholdingBreakdown,
 	ThFinalWithholdingElection,
-	type ThFinalWithholdingSourceBreakdown,
-	type ThSection40_4Dividend,
 	type ThSection40_4Input,
-	type ThSection40_4Source,
 	ThSpecialRegimeField,
 } from "../types"
 import { fromSatang, toSatang } from "../units"
 import { validateCorpTaxRate } from "../validate"
 import { extractElectableAmount } from "./assessable"
+import { type ResolvedSource, resolveSource } from "./final-withholding-source"
 
 /**
  * Section 40(4) split into regular-bracket income and final-withheld income.
@@ -29,32 +26,6 @@ export interface ThResolvedSection40_4 {
 	readonly corpTaxRate: number | undefined
 	/** Audit trail of the sources elected `"final"` and their withheld tax. */
 	readonly finalWithholding: ThFinalWithholdingBreakdown
-}
-
-type SourceInput = number | ThSection40_4Source | ThSection40_4Dividend | undefined
-
-interface ResolvedSource {
-	readonly breakdown: ThFinalWithholdingSourceBreakdown
-	readonly satang: number
-	readonly taxSatang: number
-}
-
-function electionOf(input: SourceInput): ThFinalWithholdingElection {
-	const election = typeof input === "object" ? input.election : undefined
-	return election ?? ThFinalWithholdingElection.Include
-}
-
-function resolveSource(
-	input: SourceInput,
-	field: ThSpecialRegimeField,
-	rate: number,
-): ResolvedSource {
-	const amount = extractElectableAmount(input, field)
-	const election = electionOf(input)
-	const satang = toSatang(amount, field)
-	const isFinal = election === ThFinalWithholdingElection.Final
-	const taxSatang = isFinal ? applyPercentage(satang, rate) : 0
-	return { breakdown: { election, amount, rate, tax: fromSatang(taxSatang) }, satang, taxSatang }
 }
 
 function toStructuredInput(input: number | ThSection40_4Input | undefined): ThSection40_4Input {
@@ -87,16 +58,19 @@ export function resolveSection40_4(
 	const interest = resolveSource(
 		section.interest,
 		ThSpecialRegimeField.Interest,
+		ThSpecialRegimeField.InterestElection,
 		rates.interestRate,
 	)
 	const dividends = resolveSource(
 		section.dividends,
 		ThSpecialRegimeField.Dividends,
+		ThSpecialRegimeField.DividendsElection,
 		rates.dividendRate,
 	)
 	const digital = resolveSource(
 		section.digitalAssets,
 		ThSpecialRegimeField.DigitalAssets,
+		ThSpecialRegimeField.DigitalAssetsElection,
 		rates.digitalAssetRate,
 	)
 	const corpTaxRate =

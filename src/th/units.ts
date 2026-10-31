@@ -45,12 +45,15 @@ export function fromSatang(
  * Purpose: Avoids binary float drift when aggregating gross amounts.
  * Math: Converts each amount to satang, adds, converts back to major units.
  * Units: THB major units in and out.
- * Throws: TaxValidationError if any amount is negative or non-finite.
+ * Throws: TaxValidationError if any amount is negative or non-finite, or the sum is not a safe integer.
  *
  * @param values Amounts in THB.
  * @param field Diagnostic field name reported on failure.
  * @statute Thailand Revenue Code Section 40 (gross income aggregation).
  */
 export function sumThAmounts(values: readonly number[], field?: string): number {
-	return fromSatang(values.reduce((sum, value) => sum + toSatang(value, field), 0))
+	return fromSatang(
+		values.reduce((sum, value) => sum + toSatang(value, field), 0),
+		field,
+	)
 }

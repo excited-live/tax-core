@@ -21,3 +21,32 @@ export function validateCorpTaxRate(rate: number): void {
 		)
 	}
 }
+
+/**
+ * Resolves an optional typed choice (election, payment type, acquisition type) at runtime.
+ *
+ * Purpose: TypeScript unions are erased at runtime, so untyped callers could otherwise pass an
+ * unknown string and silently get the default behaviour.
+ * Math: Returns `fallback` when `value` is `undefined`; otherwise requires membership in `choices`.
+ * Units: Dimensionless string enum.
+ * Throws: TaxValidationError (reported against `field`) if `value` is not one of `choices`.
+ *
+ * @param value Caller-supplied value, possibly outside the declared union.
+ * @param choices Typed const object whose values are the permitted choices.
+ * @param fallback Choice used when `value` is `undefined`.
+ * @param field Diagnostic field path reported on failure.
+ * @statute Jurisdiction-neutral input bound (AGENTS rule 8); no statutory citation.
+ */
+export function resolveChoice<T extends string>(
+	value: string | undefined,
+	choices: Readonly<Record<string, T>>,
+	fallback: T,
+	field: ThSpecialRegimeField,
+): T {
+	if (value === undefined) return fallback
+	const match = Object.values(choices).find((choice) => choice === value)
+	if (match === undefined) {
+		throw new TaxValidationError(field, value, "Value is not a supported choice")
+	}
+	return match
+}

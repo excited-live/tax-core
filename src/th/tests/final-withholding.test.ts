@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "../../core/money"
 import { resolveSection40_4 } from "../stages/final-withholding"
+import { type ThFinalWithholdingElection, ThSpecialRegimeField } from "../types"
 
 describe("Section 40(4) Final Withholding Election", () => {
 	it("returns zeros when no Section 40(4) income is given", () => {
@@ -95,5 +96,23 @@ describe("Section 40(4) Final Withholding Election", () => {
 			)
 		}
 		expect(() => resolveSection40_4(-5)).toThrow(TaxValidationError)
+	})
+
+	it("rejects an unknown election instead of silently including the income", () => {
+		const bad = "finl" as unknown as ThFinalWithholdingElection
+		const cases = [
+			[{ interest: { amount: 1, election: bad } }, ThSpecialRegimeField.InterestElection],
+			[{ dividends: { amount: 1, election: bad } }, ThSpecialRegimeField.DividendsElection],
+			[{ digitalAssets: { amount: 1, election: bad } }, ThSpecialRegimeField.DigitalAssetsElection],
+		] as const
+		for (const [input, field] of cases) {
+			try {
+				resolveSection40_4(input)
+				throw new Error("expected TaxValidationError")
+			} catch (error) {
+				expect(error).toBeInstanceOf(TaxValidationError)
+				expect((error as TaxValidationError).field).toBe(field)
+			}
+		}
 	})
 })

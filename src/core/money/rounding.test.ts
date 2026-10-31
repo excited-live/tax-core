@@ -59,4 +59,16 @@ describe("Rounding & percentage application", () => {
 		expect(() => applyGrossUp(100, Number.NaN)).toThrow(TaxValidationError)
 		expect(() => applyGrossUp(1.5, 0.2)).toThrow(TaxValidationError)
 	})
+
+	it("throws when the gross-up result is not a safe integer", () => {
+		// 1e13 * 0.999 / 0.001 = 9.99e15 + ... exceeds Number.MAX_SAFE_INTEGER
+		expect(() => applyGrossUp(1e13, 0.999)).toThrow(TaxValidationError)
+		expect(applyGrossUp(1e12, 0.5)).toBe(1e12)
+		try {
+			applyGrossUp(1e13, 0.999, "dividend")
+			throw new Error("expected TaxValidationError")
+		} catch (error) {
+			expect((error as TaxValidationError).field).toBe("dividend")
+		}
+	})
 })

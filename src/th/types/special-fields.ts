@@ -9,12 +9,17 @@ export enum ThSpecialRegimeField {
 	Interest = "income.section40_4.interest",
 	Dividends = "income.section40_4.dividends",
 	DigitalAssets = "income.section40_4.digitalAssets",
+	InterestElection = "income.section40_4.interest.election",
+	DividendsElection = "income.section40_4.dividends.election",
+	DigitalAssetsElection = "income.section40_4.digitalAssets.election",
 	CorpTaxRate = "income.section40_4.dividends.corpTaxRate",
 	SeparateSheetAmount = "separateSheet.amount",
 	SeparateSheetYears = "separateSheet.yearsOfService",
 	SeparateSheetLastDailyWage = "separateSheet.lastDailyWage",
+	SeparateSheetPaymentType = "separateSheet.paymentType",
 	RealEstateGrossValue = "realEstateTransfer.grossTransferValue",
 	RealEstateHoldingYears = "realEstateTransfer.holdingYears",
+	RealEstateAcquisitionType = "realEstateTransfer.acquisitionType",
 }
 
 /**

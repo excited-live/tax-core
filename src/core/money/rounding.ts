@@ -85,18 +85,28 @@ export function applyPercentage(
  *
  * @param minorUnits Non-negative integer minor units amount (the net amount).
  * @param rate Underlying rate ratio in [0, 1) (e.g. 0.2 for a 20% corporate tax rate).
+ * @param field Diagnostic field name reported on failure (defaults to `"minorUnits"`).
  * @returns Gross-up amount (`minorUnits * rate / (1 - rate)`) in integer minor units.
- * @throws {TaxValidationError} if minorUnits is not a non-negative safe integer or rate is outside [0, 1).
+ * @throws {TaxValidationError} if minorUnits is not a non-negative safe integer, rate is outside
+ * [0, 1), or the result is not a safe integer.
  * @statute Jurisdiction-neutral; Thailand Revenue Code Section 47 bis is the first consumer.
  * @example applyGrossUp(100_000, 0.2) // 25_000 (1,000.00 -> 250.00 credit at 20%)
  */
-export function applyGrossUp(minorUnits: number, rate: number): number {
-	validateIntegerMinorUnits(minorUnits, "minorUnits")
+export function applyGrossUp(minorUnits: number, rate: number, field = "minorUnits"): number {
+	validateIntegerMinorUnits(minorUnits, field)
 	validateRate(rate, "rate")
 	if (rate >= 1) {
 		throw new TaxValidationError("rate", rate, "Gross-up rate must be strictly less than 1")
 	}
 	const { num, den } = parseRateRational(rate)
 	const divisor = den - num
-	return Number((BigInt(minorUnits) * num * 2n + divisor) / (divisor * 2n)) + 0
+	const result = Number((BigInt(minorUnits) * num * 2n + divisor) / (divisor * 2n)) + 0
+	if (!Number.isSafeInteger(result)) {
+		throw new TaxValidationError(
+			field,
+			minorUnits,
+			"Gross-up result exceeds the safe integer range",
+		)
+	}
+	return result
 }

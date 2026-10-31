@@ -67,7 +67,7 @@ The Section 47 bis gross-up and tax credit granted when a taxpayer elects to inc
 _Avoid_: Dividend deduction
 
 **Minimum Gross Tax**:
-The Section 48(2) alternative calculation equal to 0.5% of gross Assessable Income under Sections 40(2)–40(8) when such income is at least 60,000 THB, payable only if it exceeds 5,000 THB and exceeds progressive bracket tax.
+The Section 48(2) alternative calculation equal to 0.5% of gross Assessable Income under Sections 40(2)–40(8) when such income is at least 120,000 THB, payable only if it exceeds 5,000 THB and exceeds progressive bracket tax.
 _Avoid_: Alternative minimum tax
 
 ## United States (`US`)

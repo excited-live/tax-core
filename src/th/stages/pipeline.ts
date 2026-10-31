@@ -64,7 +64,10 @@ export function runThTaxPipeline(input: ThTaxInput = {}): TaxResult<"THB", ThBre
 		dividendTaxCredit: special.dividendTaxCredit.credit,
 		withholdingTax: withholding,
 	})
-	const grossIncome = sumThAmounts([assessable.total, special.grossOutsideRegular])
+	const grossIncome = sumThAmounts(
+		[assessable.total, special.grossOutsideRegular],
+		ThBracketField.GrossIncome,
+	)
 	const effectiveRate = grossIncome > 0 ? combined.totalCombinedTax / grossIncome : 0
 
 	const breakdown: ThBreakdown = {

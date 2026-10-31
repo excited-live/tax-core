@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "../../core/money"
+import { ThBracketField } from "../types"
 import { fromSatang, sumThAmounts, toSatang } from "../units"
 import { validateCorpTaxRate } from "../validate"
 
@@ -16,6 +17,16 @@ describe("Thailand unit helpers", () => {
 		expect(sumThAmounts([0.1, 0.2])).toBe(0.3)
 		expect(sumThAmounts([])).toBe(0)
 		expect(() => sumThAmounts([1, -1])).toThrow(TaxValidationError)
+	})
+
+	it("reports the caller's typed field when a sum leaves the safe integer range", () => {
+		try {
+			sumThAmounts([6e13, 6e13], ThBracketField.GrossIncome)
+			throw new Error("expected TaxValidationError")
+		} catch (error) {
+			expect(error).toBeInstanceOf(TaxValidationError)
+			expect((error as TaxValidationError).field).toBe(ThBracketField.GrossIncome)
+		}
 	})
 })
 

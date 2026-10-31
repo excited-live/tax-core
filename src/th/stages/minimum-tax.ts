@@ -5,7 +5,8 @@ import { type ThMinimumGrossTaxBreakdown, ThTaxField } from "../types"
 /**
  * Calculates Section 48(2) Minimum Gross Tax on Section 40(2)–40(8) income.
  *
- * Math: 0.5% of gross Section 40(2)–(8) if gross >= 60,000 THB. Waived if <= 5,000 THB.
+ * Math: 0.5% of gross Section 40(2)–(8) if gross >= 120,000 THB; payable only if the 0.5% tax exceeds 5,000 THB
+ * and exceeds the progressive tax.
  * Units: THB major units.
  *
  * @statute Thailand Revenue Code Section 48(2).
