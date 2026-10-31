@@ -5,7 +5,7 @@ import type { ThBreakdown, ThTaxInput } from "./types"
 /**
  * Thailand Tax System implementation for 2026.
  *
- * Implements TaxSystem contract for `@excited-live/tax/th`.
+ * Implements TaxSystem contract for `@trajectonomics/tax/th`.
  */
 export const th: TaxSystem<ThTaxInput, "THB", ThBreakdown> = {
 	jurisdiction: "TH",

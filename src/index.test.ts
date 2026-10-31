@@ -18,7 +18,7 @@ import {
 import * as th from "./th/index"
 import * as us from "./us/index"
 
-describe("@excited-live/tax public index exports", () => {
+describe("@trajectonomics/tax public index exports", () => {
 	it("exports all expected core utilities and functions", () => {
 		expect(typeof CURRENCIES).toBe("object")
 		expect(typeof getCurrencyPrecision).toBe("function")

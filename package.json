@@ -1,11 +1,11 @@
 {
-	"name": "@excited-live/tax",
+	"name": "@trajectonomics/tax",
 	"version": "0.0.0-development",
 	"description": "Pure, multi-jurisdiction individual income tax engine (TH 2026, US placeholder)",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/excited-live/tax-core.git"
+		"url": "git+https://github.com/trajectonomics-lab/tax-core.git"
 	},
 	"type": "module",
 	"sideEffects": false,
