@@ -37,7 +37,7 @@ export function executeUsTaxCalculation(input: UsTaxInput): TaxResult<"USD", UsT
 	const ordRes = evaluateBrackets(
 		dedRes.ordinaryTaxableCents,
 		US_2026_PARAMETERS.ordinaryBrackets[input.filingStatus],
-		agiRes.grossIncomeCents,
+		Math.max(0, agiRes.grossIncomeCents),
 		"ordinaryTaxableIncome",
 	)
 	const prefRes = calculateUsPreferentialStacking(

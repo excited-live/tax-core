@@ -27,6 +27,21 @@ describe("Schedule 1 Adjustments and AGI Stage", () => {
 		expect(res.agi).toBe(usd(146_000))
 	})
 
+	it("handles Schedule C self-employment loss signed in ordinary and gross income", () => {
+		const res = calculateUsAgi(
+			{
+				w2Wages: 50_000,
+				selfEmploymentNetEarnings: -10_000,
+			},
+			undefined,
+			"single",
+			US_2026_PARAMETERS,
+		)
+		expect(res.ordinaryGrossIncome).toBe(usd(40_000))
+		expect(res.grossIncome).toBe(usd(40_000))
+		expect(res.agi).toBe(usd(40_000))
+	})
+
 	it("clamps educator expenses to $350 for single and $700 for MFJ both", () => {
 		const singleAdj = calculateUsAdjustments(
 			{ educatorExpenses: 500 },

@@ -129,4 +129,23 @@ describe("US Federal Individual Income Tax System", () => {
 		expect(result.breakdown.standardDeduction.base).toBe(usd(24_150))
 		expect(result.taxableIncome).toBe(usd(35_850))
 	})
+
+	it("processes Schedule C net business loss reducing AGI while flooring SE and FICA at zero", () => {
+		const result = calculateUsTax({
+			filingStatus: "single",
+			income: {
+				w2Wages: 100_000,
+				selfEmploymentNetEarnings: -15_000,
+			},
+			credits: {
+				educationStudents: [{ type: "aotc", qualifiedExpenses: 10_000 }],
+			},
+			includeFica: true,
+		})
+
+		expect(result.grossIncome).toBe(usd(85_000))
+		expect(result.breakdown.agi).toBe(usd(85_000))
+		expect(result.breakdown.scheduleSe?.totalSelfEmploymentTax).toBe(usd(0))
+		expect(result.breakdown.fica?.medicareWages).toBe(usd(100_000))
+	})
 })
