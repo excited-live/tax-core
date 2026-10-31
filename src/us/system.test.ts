@@ -10,25 +10,17 @@ describe("US Federal Individual Income Tax System", () => {
 		expect(typeof us.calculate).toBe("function")
 	})
 
-	it("computes end-to-end tax for typical single W-2 employee with withholding refund", () => {
-		// Gross income: $85,000 W-2.
-		// Standard deduction: $16,100.
-		// Taxable income: $68,900.
-		// Ordinary brackets:
-		// 10% on 12,400 = 1,240
-		// 12% on (50,400 - 12,400 = 38,000) = 4,560
-		// 22% on (68,900 - 50,400 = 18,500) = 4,070
-		// Total tax: 1,240 + 4,560 + 4,070 = 9,870.
-		// Withholding: 10,000.
-		// Net tax payable: -130 (refund).
+	it("computes end-to-end tax for typical single W-2 employee with withholding refund when excluding FICA", () => {
 		const result = calculateUsTax({
 			filingStatus: "single",
 			income: { w2Wages: 85_000 },
 			withholding: 10_000,
+			includeFica: false,
 		})
 
 		expect(result.grossIncome).toBe(usd(85_000))
 		expect(result.taxableIncome).toBe(usd(68_900))
+		expect(result.breakdown.regularIncomeTax).toBe(usd(9_870))
 		expect(result.totalTax).toBe(usd(9_870))
 		expect(result.marginalRate).toBe(0.22)
 		expect(result.effectiveRate).toBeCloseTo(9_870 / 85_000, 6)
@@ -37,15 +29,19 @@ describe("US Federal Individual Income Tax System", () => {
 		expect(result.breakdown.niit.tax).toBe(usd(0))
 	})
 
+	it("computes default end-to-end tax including FICA payroll taxes", () => {
+		const result = calculateUsTax({
+			filingStatus: "single",
+			income: { w2Wages: 85_000 },
+			withholding: 10_000,
+		})
+		expect(result.breakdown.regularIncomeTax).toBe(usd(9_870))
+		expect(result.breakdown.fica?.totalFicaTax).toBe(usd(6_502.5))
+		expect(result.totalTax).toBe(usd(16_372.5))
+		expect(result.netTaxPayable).toBe(usd(6_372.5))
+	})
+
 	it("computes MFJ couple with adjustments, itemized deductions, and preferential income", () => {
-		// MFJ with 200k wages, 40k LTCG, 10k 401k deferral, 20k mortgage, 15k SALT
-		// Gross: 240k (200k ord + 40k pref).
-		// Adjustments: 10k 401k -> AGI = 230k.
-		// Itemized: mortgage 20k + SALT capped at 10k = 30k.
-		// Standard deduction: 32,200.
-		// Auto elects standard (32,200 > 30,000).
-		// Taxable income: 230,000 - 32,200 = 197,800.
-		// Pref gross: 40,000. Ordinary taxable: 197,800 - 40,000 = 157,800. Pref taxable: 40,000.
 		const result = calculateUsTax({
 			filingStatus: "married_filing_jointly",
 			income: {
@@ -56,33 +52,68 @@ describe("US Federal Individual Income Tax System", () => {
 				preTaxDeferrals401k: 10_000,
 			},
 			itemizedDeductions: {
-				mortgageInterest: 20_000,
+				mortgageInterest: 30_000,
 				stateAndLocalTaxes: 15_000,
 			},
+			includeFica: false,
 		})
 
 		expect(result.breakdown.grossIncome).toBe(usd(240_000))
 		expect(result.breakdown.agi).toBe(usd(230_000))
-		expect(result.breakdown.electedDeduction).toBe("standard")
-		expect(result.breakdown.allowableDeduction).toBe(usd(32_200))
-		expect(result.taxableIncome).toBe(usd(197_800))
-		expect(result.breakdown.ordinaryTaxableIncome).toBe(usd(157_800))
+		expect(result.breakdown.electedDeduction).toBe("itemized")
+		expect(result.breakdown.allowableDeduction).toBe(usd(40_000))
+		expect(result.taxableIncome).toBe(usd(190_000))
+		expect(result.breakdown.ordinaryTaxableIncome).toBe(usd(150_000))
 		expect(result.breakdown.preferentialTaxableIncome).toBe(usd(40_000))
 	})
 
+	it("computes self-employment tax and flows 50% deductible SE tax into AGI adjustments", () => {
+		const result = calculateUsTax({
+			filingStatus: "single",
+			income: { selfEmploymentNetEarnings: 100_000 },
+			includeFica: false,
+		})
+		expect(result.breakdown.scheduleSe?.totalSelfEmploymentTax).toBe(usd(14_129.55))
+		expect(result.breakdown.scheduleSe?.deductiblePortion).toBe(usd(7_064.78))
+		expect(result.breakdown.adjustments.deductibleSelfEmploymentTax).toBe(usd(7_064.78))
+		expect(result.breakdown.agi).toBe(usd(92_935.22))
+	})
+
+	it("computes Form 6251 AMT when preference items trigger alternative minimum tax", () => {
+		const result = calculateUsTax({
+			filingStatus: "single",
+			income: { w2Wages: 150_000 },
+			amtPreferences: 200_000,
+			includeFica: false,
+		})
+		expect(result.breakdown.amt?.amtTax).toBe(usd(38_748))
+		expect(result.totalTax).toBe(usd(result.breakdown.regularIncomeTax + 38_748))
+	})
+
+	it("computes CTC, ACTC, and EITC refundable credits reducing net tax payable", () => {
+		const result = calculateUsTax({
+			filingStatus: "single",
+			income: { w2Wages: 30_000 },
+			credits: {
+				qualifyingChildrenForChildTaxCredit: 1,
+				eitcQualifyingChildren: 1,
+			},
+			includeFica: false,
+		})
+		expect(result.breakdown.credits?.childCredits.nonRefundableCtcUsed).toBe(usd(1_420))
+		expect(result.breakdown.credits?.childCredits.actcRefundable).toBe(usd(580))
+		expect(result.breakdown.credits?.eitc.credit).toBe(usd(3_263.73))
+		expect(result.netTaxPayable).toBe(usd(-3_843.73, "netTaxPayable", { allowNegative: true }))
+	})
+
 	it("computes high-income single filer with NIIT and 37% top bracket", () => {
-		// Single with 800k wages, 100k capital gains.
-		// Standard deduction: 16,100.
-		// Gross: 900k. AGI: 900k. Taxable: 883,900.
-		// Ordinary taxable: 783,900. Pref taxable: 100,000.
-		// NIIT: NII = 100k. MAGI = 900k. Single threshold = 200k. Excess = 700k.
-		// Subject to NIIT = min(100k, 700k) = 100k. NIIT = 100k * 0.038 = 3,800.
 		const result = calculateUsTax({
 			filingStatus: "single",
 			income: {
 				w2Wages: 800_000,
 				longTermCapitalGains: 100_000,
 			},
+			includeFica: false,
 		})
 
 		expect(result.marginalRate).toBe(0.37)
@@ -97,5 +128,24 @@ describe("US Federal Individual Income Tax System", () => {
 		})
 		expect(result.breakdown.standardDeduction.base).toBe(usd(24_150))
 		expect(result.taxableIncome).toBe(usd(35_850))
+	})
+
+	it("processes Schedule C net business loss reducing AGI while flooring SE and FICA at zero", () => {
+		const result = calculateUsTax({
+			filingStatus: "single",
+			income: {
+				w2Wages: 100_000,
+				selfEmploymentNetEarnings: -15_000,
+			},
+			credits: {
+				educationStudents: [{ type: "aotc", qualifiedExpenses: 10_000 }],
+			},
+			includeFica: true,
+		})
+
+		expect(result.grossIncome).toBe(usd(85_000))
+		expect(result.breakdown.agi).toBe(usd(85_000))
+		expect(result.breakdown.scheduleSe?.totalSelfEmploymentTax).toBe(usd(0))
+		expect(result.breakdown.fica?.medicareWages).toBe(usd(100_000))
 	})
 })

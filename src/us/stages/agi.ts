@@ -24,7 +24,9 @@ export interface UsAgiStageResult {
 function sumOrdinaryIncomeCents(income: UsIncomeInput): number {
 	return (
 		toMinorUnits(income.w2Wages ?? 0, "USD", "w2Wages") +
-		toMinorUnits(income.selfEmploymentNetEarnings ?? 0, "USD", "selfEmploymentNetEarnings") +
+		toMinorUnits(income.selfEmploymentNetEarnings ?? 0, "USD", "selfEmploymentNetEarnings", {
+			allowNegative: true,
+		}) +
 		toMinorUnits(income.ordinaryInterest ?? 0, "USD", "ordinaryInterest") +
 		toMinorUnits(income.ordinaryDividends ?? 0, "USD", "ordinaryDividends") +
 		toMinorUnits(income.shortTermCapitalGains ?? 0, "USD", "shortTermCapitalGains") +
@@ -63,9 +65,17 @@ export function calculateUsAgi(
 		grossIncomeCents: grossCents,
 		totalAdjustmentsCents: adjResult.totalAdjCents,
 		agiCents,
-		ordinaryGrossIncome: usd(fromMinorUnits(ordinaryCents, "USD")),
+		ordinaryGrossIncome: usd(
+			fromMinorUnits(ordinaryCents, "USD", "ordinaryGrossIncome", { allowNegative: true }),
+			"ordinaryGrossIncome",
+			{ allowNegative: true },
+		),
 		preferentialGrossIncome: usd(fromMinorUnits(prefCents, "USD")),
-		grossIncome: usd(fromMinorUnits(grossCents, "USD")),
+		grossIncome: usd(
+			fromMinorUnits(grossCents, "USD", "grossIncome", { allowNegative: true }),
+			"grossIncome",
+			{ allowNegative: true },
+		),
 		agi: usd(fromMinorUnits(agiCents, "USD")),
 		adjustments: adjResult.breakdown,
 	}
