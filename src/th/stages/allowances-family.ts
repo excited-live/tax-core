@@ -25,10 +25,11 @@ const unclamped = (n: number): ClampedAmount => ({
 	wasClamped: false,
 })
 
-function countBonusChildren(children: readonly ThChild[], cutoffYear: number): number {
+function countBonusChildren(children: readonly ThChild[], cutoff: number): number {
+	const sorted = [...children].sort((a, b) => (a.birthYear ?? 0) - (b.birthYear ?? 0))
 	let bonus = 0
-	for (let i = 1; i < children.length; i++) {
-		if ((children[i]?.birthYear ?? 0) >= cutoffYear) bonus++
+	for (let i = 1; i < sorted.length; i++) {
+		if ((sorted[i]?.birthYear ?? 0) >= cutoff) bonus++
 	}
 	return bonus
 }
@@ -41,8 +42,10 @@ function computeChildAllowance(children: ThAllowancesInput["children"]): Clamped
 		return unclamped(children.length * p.basePerChild + bonus * p.bonusSecondPlusBorn2018OrLater)
 	}
 	const counts = children as ThChildrenInput
-	const count = counts.totalCount ?? 0
-	const bonus = counts.secondPlusBorn2018OrLaterCount ?? 0
+	validateMonetaryAmount(counts.totalCount ?? 0, ThAllowanceField.Children)
+	const count = Math.max(0, Math.floor(counts.totalCount ?? 0))
+	const bonusReq = Math.max(0, Math.floor(counts.secondPlusBorn2018OrLaterCount ?? 0))
+	const bonus = Math.min(bonusReq, Math.max(0, count - 1))
 	return unclamped(count * p.basePerChild + bonus * p.bonusSecondPlusBorn2018OrLater)
 }
 
@@ -51,7 +54,10 @@ function computeParentCount(
 	status: ThFilingStatus,
 ): number {
 	if (parents === undefined) return 0
-	if (typeof parents === "number") return parents
+	if (typeof parents === "number") {
+		validateMonetaryAmount(parents, ThAllowanceField.Parents)
+		return Math.floor(parents)
+	}
 	let count = (parents.taxpayerFather ? 1 : 0) + (parents.taxpayerMother ? 1 : 0)
 	if (status === "married_no_income_spouse") {
 		count += (parents.spouseFather ? 1 : 0) + (parents.spouseMother ? 1 : 0)
@@ -69,7 +75,8 @@ export function calculateFamilyAllowances(
 	filingStatus: ThFilingStatus = "single",
 ): ThFamilyAllowancesResult {
 	const p = TH_2026_PARAMETERS.allowances
-	const personal = unclamped(p.personal)
+	const personalReq = input.personal ?? p.personal
+	const personal = clampCap(personalReq, p.personal, ThAllowanceField.Personal)
 
 	const isSpouseEligible =
 		filingStatus === "married_no_income_spouse" || filingStatus === "married_joint"

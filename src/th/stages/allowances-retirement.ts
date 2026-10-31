@@ -24,26 +24,37 @@ export function calculateRetirementAllowances(
 	wageBase: number,
 ): ThRetirementAllowancesResult {
 	const p = TH_2026_PARAMETERS.allowances.retirementCluster
-	const wage = wageBase > 0 ? wageBase : assessableIncome
+	const currency = TH_2026_PARAMETERS.currency
+	const wage = Math.max(wageBase, 0)
 
 	const rmf = clampCap(
 		input.rmf ?? 0,
-		{ base: assessableIncome, rate: p.rmf.maxRate, ceiling: p.rmf.ceiling },
+		{
+			base: assessableIncome,
+			rate: p.rmf.maxRate,
+			ceiling: p.rmf.ceiling,
+			currency,
+		},
 		ThAllowanceField.Rmf,
 	)
 	const ssf = clampCap(
 		input.ssf ?? 0,
-		{ base: assessableIncome, rate: p.ssf.maxRate, ceiling: p.ssf.ceiling },
+		{
+			base: assessableIncome,
+			rate: p.ssf.maxRate,
+			ceiling: p.ssf.ceiling,
+			currency,
+		},
 		ThAllowanceField.Ssf,
 	)
 	const pvd = clampCap(
 		input.pvd ?? 0,
-		{ base: wage, rate: p.pvd.maxRate, ceiling: p.pvd.ceiling },
+		{ base: wage, rate: p.pvd.maxRate, ceiling: p.pvd.ceiling, currency },
 		ThAllowanceField.Pvd,
 	)
 	const gpf = clampCap(
 		input.gpf ?? 0,
-		{ base: wage, rate: p.gpf.maxRate, ceiling: p.gpf.ceiling },
+		{ base: wage, rate: p.gpf.maxRate, ceiling: p.gpf.ceiling, currency },
 		ThAllowanceField.Gpf,
 	)
 	const nsf = clampCap(input.nsf ?? 0, p.nsf.ceiling, ThAllowanceField.Nsf)
@@ -53,6 +64,7 @@ export function calculateRetirementAllowances(
 			base: assessableIncome,
 			rate: p.pensionLifeInsurance.maxRate,
 			ceiling: p.pensionLifeInsurance.ceiling,
+			currency,
 		},
 		ThAllowanceField.PensionLife,
 	)
@@ -83,6 +95,7 @@ export function calculateRetirementAllowances(
 			base: assessableIncome,
 			rate: thaiEsgParam.maxRate,
 			ceiling: thaiEsgParam.ceiling,
+			currency,
 		},
 		ThAllowanceField.ThaiEsg,
 	)

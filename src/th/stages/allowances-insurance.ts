@@ -1,4 +1,5 @@
 import { type ClampedAmount, clampCap } from "../../core/caps"
+import { validateMonetaryAmount } from "../../core/money"
 import { TH_2026_PARAMETERS } from "../parameters"
 import { ThAllowanceField, type ThAllowancesInput, type ThFilingStatus } from "../types"
 
@@ -33,6 +34,9 @@ export function calculateInsuranceAllowances(
 		ThAllowanceField.HealthInsurance,
 	)
 	const rawLife = input.lifeInsurance ?? 0
+	if (input.lifeInsurance !== undefined) {
+		validateMonetaryAmount(rawLife, ThAllowanceField.LifeHealthCombined)
+	}
 	const lifeCombinedRequested = rawLife + (input.healthInsurance ?? 0)
 	const lifeEffectiveRequested = rawLife + healthClamped.allowed
 	const lifeCombined = clampCap(

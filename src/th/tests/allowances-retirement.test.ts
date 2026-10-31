@@ -65,8 +65,11 @@ describe("Thailand Retirement Cluster and ThaiESG Allowances", () => {
 		expect(over.thaiEsg.wasClamped).toBe(true)
 	})
 
-	it("uses assessableIncome when wageBase is zero", () => {
-		const res = calculateRetirementAllowances({ pvd: 50_000 }, 1_000_000, 0)
-		expect(res.retirementCluster.pvd.allowed).toBe(50_000)
+	it("restricts PVD to employment wage base and allows fractional satang", () => {
+		const noWage = calculateRetirementAllowances({ pvd: 50_000 }, 500_000, 0)
+		expect(noWage.retirementCluster.pvd.allowed).toBe(0)
+
+		const fractional = calculateRetirementAllowances({ rmf: 50_000 }, 100_000.5, 100_000.5)
+		expect(fractional.retirementCluster.rmf.allowed).toBe(30_000.15)
 	})
 })

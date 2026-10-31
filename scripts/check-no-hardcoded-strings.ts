@@ -5,15 +5,15 @@ const STAGES_DIR = join(import.meta.dir, "../src/th/stages")
 
 const FORBIDDEN_PATTERNS: Array<{ regex: RegExp; description: string }> = [
 	{
-		regex: /"(?:expense|income|allowances?)\.[a-zA-Z0-9_.]+"/g,
+		regex: /"(?:expense|income|allowances?)\.[a-zA-Z0-9_.]+"/,
 		description: "Hardcoded diagnostic string (use Th*Field enum instead)",
 	},
 	{
-		regex: /(?:toMinorUnits|fromMinorUnits)\([^,\n]+,\s*"THB"/g,
+		regex: /(?:toMinorUnits|fromMinorUnits)\([^,\n]+,\s*"THB"/,
 		description: "Hardcoded 'THB' in minor units call (use TH_2026_PARAMETERS.currency)",
 	},
 	{
-		regex: /toMinorUnits\([^,\n]+,\s*[^,\n]+,\s*"(?:taxableIncome|grossIncome)"\)/g,
+		regex: /toMinorUnits\([^,\n]+,\s*[^,\n]+,\s*"(?:taxableIncome|grossIncome)"\)/,
 		description: "Hardcoded bracket field string (use ThBracketField enum)",
 	},
 ]
@@ -43,5 +43,5 @@ if (hasErrors) {
 	console.error("\nFAILURE: Hardcoded strings detected in stage implementations.")
 	process.exit(1)
 } else {
-	console.log("PASS: No hardcoded text or currency strings detected in stages.")
+	console.log("PASS: No hardcoded text or currency strings detected in stages.\n")
 }

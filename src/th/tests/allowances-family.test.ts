@@ -43,11 +43,15 @@ describe("Thailand Family Allowances", () => {
 		})
 		expect(threeChildren.children.allowed).toBe(150_000)
 
-		// Children with undefined birthYear
-		const noYearChildren = calculateFamilyAllowances({
-			children: [{}, {}],
+		// Children array order independence (chronological birth order)
+		const orderA = calculateFamilyAllowances({
+			children: [{ birthYear: 2019 }, { birthYear: 2010 }],
 		})
-		expect(noYearChildren.children.allowed).toBe(60_000)
+		const orderB = calculateFamilyAllowances({
+			children: [{ birthYear: 2010 }, { birthYear: 2019 }],
+		})
+		expect(orderA.children.allowed).toBe(90_000)
+		expect(orderB.children.allowed).toBe(90_000)
 
 		// Direct count input
 		const countInput = calculateFamilyAllowances({

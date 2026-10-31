@@ -38,5 +38,20 @@ describe("Statutory Cap clamping helper (clampCap)", () => {
 		})
 		expect(result.allowed).toBe(100_000)
 		expect(result.wasClamped).toBe(true)
+
+		// Non-integer base without currency specified
+		const nonIntCap = resolveCap({
+			base: 100.5,
+			rate: 0.1,
+		})
+		expect(nonIntCap).toBe(10)
+
+		// Base with currency specified
+		const currencyCap = resolveCap({
+			base: 100.5,
+			rate: 0.1,
+			currency: "THB",
+		})
+		expect(currencyCap).toBe(10.05)
 	})
 })
