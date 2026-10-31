@@ -1,11 +1,12 @@
 import { validateMonetaryAmount } from "../../core/money"
-import type {
-	ThAssessableIncomeBreakdown,
-	ThAssessableIncomeInput,
-	ThExpenseElectableIncome,
-	ThSection40_5Input,
-	ThSection40_6Input,
-	ThSection40_8Input,
+import {
+	ThAssessableField,
+	type ThAssessableIncomeBreakdown,
+	type ThAssessableIncomeInput,
+	type ThExpenseElectableIncome,
+	type ThSection40_5Input,
+	type ThSection40_6Input,
+	type ThSection40_8Input,
 } from "../types"
 
 export function extractElectableAmount(
@@ -24,24 +25,27 @@ export function extractElectableAmount(
 function sumSection40_5(input: ThSection40_5Input | undefined): number {
 	if (!input) return 0
 	return (
-		extractElectableAmount(input.building, "income.section40_5.building") +
-		extractElectableAmount(input.agriculturalLand, "income.section40_5.agriculturalLand") +
-		extractElectableAmount(input.nonAgriculturalLand, "income.section40_5.nonAgriculturalLand") +
-		extractElectableAmount(input.vehicles, "income.section40_5.vehicles") +
-		extractElectableAmount(input.other, "income.section40_5.other")
+		extractElectableAmount(input.building, ThAssessableField.Section40_5_Building) +
+		extractElectableAmount(input.agriculturalLand, ThAssessableField.Section40_5_AgriculturalLand) +
+		extractElectableAmount(
+			input.nonAgriculturalLand,
+			ThAssessableField.Section40_5_NonAgriculturalLand,
+		) +
+		extractElectableAmount(input.vehicles, ThAssessableField.Section40_5_Vehicles) +
+		extractElectableAmount(input.other, ThAssessableField.Section40_5_Other)
 	)
 }
 
 function sumSection40_6(input: ThSection40_6Input | undefined): number {
 	if (!input) return 0
 	return (
-		extractElectableAmount(input.medical, "income.section40_6.medical") +
-		extractElectableAmount(input.law, "income.section40_6.law") +
-		extractElectableAmount(input.engineering, "income.section40_6.engineering") +
-		extractElectableAmount(input.architecture, "income.section40_6.architecture") +
-		extractElectableAmount(input.accounting, "income.section40_6.accounting") +
-		extractElectableAmount(input.fineArts, "income.section40_6.fineArts") +
-		extractElectableAmount(input.other, "income.section40_6.other")
+		extractElectableAmount(input.medical, ThAssessableField.Section40_6_Medical) +
+		extractElectableAmount(input.law, ThAssessableField.Section40_6_Law) +
+		extractElectableAmount(input.engineering, ThAssessableField.Section40_6_Engineering) +
+		extractElectableAmount(input.architecture, ThAssessableField.Section40_6_Architecture) +
+		extractElectableAmount(input.accounting, ThAssessableField.Section40_6_Accounting) +
+		extractElectableAmount(input.fineArts, ThAssessableField.Section40_6_FineArts) +
+		extractElectableAmount(input.other, ThAssessableField.Section40_6_Other)
 	)
 }
 
@@ -50,11 +54,14 @@ function sumSection40_8(
 ): number {
 	if (input === undefined) return 0
 	if (typeof input === "number" || "amount" in input) {
-		return extractElectableAmount(input as number | ThExpenseElectableIncome, "income.section40_8")
+		return extractElectableAmount(
+			input as number | ThExpenseElectableIncome,
+			ThAssessableField.Section40_8,
+		)
 	}
 	return (
-		extractElectableAmount(input.general, "income.section40_8.general") +
-		extractElectableAmount(input.entertainer, "income.section40_8.entertainer")
+		extractElectableAmount(input.general, ThAssessableField.Section40_8_General) +
+		extractElectableAmount(input.entertainer, ThAssessableField.Section40_8_Entertainer)
 	)
 }
 
@@ -66,16 +73,16 @@ function sumSection40_8(
 export function calculateAssessableIncome(
 	input: ThAssessableIncomeInput = {},
 ): ThAssessableIncomeBreakdown {
-	const s1 = extractElectableAmount(input.section40_1, "income.section40_1")
-	const s2 = extractElectableAmount(input.section40_2, "income.section40_2")
-	const s3 = extractElectableAmount(input.section40_3, "income.section40_3")
+	const s1 = extractElectableAmount(input.section40_1, ThAssessableField.Section40_1)
+	const s2 = extractElectableAmount(input.section40_2, ThAssessableField.Section40_2)
+	const s3 = extractElectableAmount(input.section40_3, ThAssessableField.Section40_3)
 	const s4 = extractElectableAmount(
 		typeof input.section40_4 === "number" ? input.section40_4 : input.section40_4?.amount,
-		"income.section40_4",
+		ThAssessableField.Section40_4,
 	)
 	const s5 = sumSection40_5(input.section40_5)
 	const s6 = sumSection40_6(input.section40_6)
-	const s7 = extractElectableAmount(input.section40_7, "income.section40_7")
+	const s7 = extractElectableAmount(input.section40_7, ThAssessableField.Section40_7)
 	const s8 = sumSection40_8(input.section40_8)
 
 	const total = s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8

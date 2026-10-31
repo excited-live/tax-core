@@ -1,6 +1,7 @@
 import { type BracketEvaluationResult, evaluateBrackets } from "../../core/brackets"
 import { fromMinorUnits, toMinorUnits } from "../../core/money"
 import { TH_2026_PARAMETERS } from "../parameters"
+import { ThBracketField } from "../types"
 
 /**
  * Evaluates progressive tax brackets for Thailand PIT.
@@ -14,24 +15,25 @@ export function evaluateThBrackets(
 	totalTax: number
 	brackets: BracketEvaluationResult
 } {
+	const currency = TH_2026_PARAMETERS.currency
 	const minorBrackets = TH_2026_PARAMETERS.brackets.map((b) => ({
-		upTo: b.upTo === null ? null : toMinorUnits(b.upTo, "THB"),
+		upTo: b.upTo === null ? null : toMinorUnits(b.upTo, currency),
 		rate: b.rate,
 	}))
-	const taxableMinor = toMinorUnits(taxableIncome, "THB", "taxableIncome")
-	const grossMinor = toMinorUnits(grossIncome, "THB", "grossIncome")
+	const taxableMinor = toMinorUnits(taxableIncome, currency, ThBracketField.TaxableIncome)
+	const grossMinor = toMinorUnits(grossIncome, currency, ThBracketField.GrossIncome)
 	const res = evaluateBrackets(taxableMinor, minorBrackets, grossMinor)
 
 	const slices = res.slices.map((s) => ({
 		bracketIndex: s.bracketIndex,
-		lowerBound: fromMinorUnits(s.lowerBound, "THB"),
-		upperBound: s.upperBound !== null ? fromMinorUnits(s.upperBound, "THB") : null,
+		lowerBound: fromMinorUnits(s.lowerBound, currency),
+		upperBound: s.upperBound !== null ? fromMinorUnits(s.upperBound, currency) : null,
 		rate: s.rate,
-		taxableAmount: fromMinorUnits(s.taxableAmount, "THB"),
-		tax: fromMinorUnits(s.tax, "THB"),
+		taxableAmount: fromMinorUnits(s.taxableAmount, currency),
+		tax: fromMinorUnits(s.tax, currency),
 	}))
 
-	const totalTax = fromMinorUnits(res.totalTax, "THB")
+	const totalTax = fromMinorUnits(res.totalTax, currency)
 	return {
 		totalTax,
 		brackets: {

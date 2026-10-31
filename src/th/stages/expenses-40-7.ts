@@ -1,6 +1,6 @@
 import type { ClampedAmount } from "../../core/caps"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type { ThExpenseElectableIncome } from "../types"
+import { type ThExpenseElectableIncome, ThExpenseField } from "../types"
 import { calculateElectableItemExpense } from "./electable-expense"
 
 /**
@@ -17,6 +17,6 @@ export function calculateExpenses40_7(
 	return calculateElectableItemExpense(
 		input,
 		TH_2026_PARAMETERS.expenses.section40_7.rate,
-		"expense.section40_7",
+		ThExpenseField.Section40_7,
 	)
 }

@@ -1,6 +1,6 @@
 import { type ClampedAmount, clampCap } from "../../core/caps"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type { ThExpenseElectableIncome } from "../types"
+import { type ThExpenseElectableIncome, ThExpenseField } from "../types"
 
 /**
  * Calculates Section 40(3) royalties/goodwill/copyright expense deduction.
@@ -20,8 +20,12 @@ export function calculateExpenses40_3(
 	const isActual = typeof input === "object" && input.expenseElection === "actual"
 	if (isActual) {
 		const requested = input.actualExpense ?? 0
-		return clampCap(requested, incomeAmount, "expense.section40_3")
+		return clampCap(requested, incomeAmount, ThExpenseField.Section40_3)
 	}
 	const requested = Math.floor(incomeAmount * TH_2026_PARAMETERS.expenses.section40_3.rate)
-	return clampCap(requested, TH_2026_PARAMETERS.expenses.section40_3.ceiling, "expense.section40_3")
+	return clampCap(
+		requested,
+		TH_2026_PARAMETERS.expenses.section40_3.ceiling,
+		ThExpenseField.Section40_3,
+	)
 }

@@ -1,6 +1,7 @@
 import { TaxValidationError, thb, validateMonetaryAmount } from "../../core/money"
 import type { TaxResult } from "../../core/system"
-import type { ThBreakdown, ThTaxInput } from "../types"
+import { TH_2026_PARAMETERS } from "../parameters"
+import { ThBracketField, type ThBreakdown, ThTaxField, type ThTaxInput } from "../types"
 import { calculateAllowances } from "./allowances"
 import { calculateAssessableIncome } from "./assessable"
 import { evaluateThBrackets } from "./bracket-eval"
@@ -8,9 +9,9 @@ import { calculateExpenseDeductions } from "./expenses"
 import { calculateMinimumGrossTax } from "./minimum-tax"
 
 function validateYear(year?: number): void {
-	if (year !== undefined && year !== 2026) {
+	if (year !== undefined && year !== TH_2026_PARAMETERS.taxYear) {
 		throw new TaxValidationError(
-			"taxYear",
+			ThTaxField.TaxYear,
 			year,
 			"Unsupported tax year; only 2026 is currently supported",
 		)
@@ -26,7 +27,7 @@ export function runThTaxPipeline(input: ThTaxInput = {}): TaxResult<"THB", ThBre
 	validateYear(input.taxYear)
 	const filingStatus = input.filingStatus ?? "single"
 	const withholding = input.withholdingTax ?? 0
-	validateMonetaryAmount(withholding, "withholdingTax")
+	validateMonetaryAmount(withholding, ThTaxField.WithholdingTax)
 
 	const assessable = calculateAssessableIncome(input.income)
 	const expenses = calculateExpenseDeductions(input.income, assessable)
@@ -67,14 +68,16 @@ export function runThTaxPipeline(input: ThTaxInput = {}): TaxResult<"THB", ThBre
 
 	return {
 		jurisdiction: "TH",
-		taxYear: 2026,
-		currency: "THB",
-		grossIncome: thb(assessable.total, "grossIncome"),
-		taxableIncome: thb(allowancesRes.netTaxableIncome, "taxableIncome"),
-		totalTax: thb(totalTax, "totalTax"),
+		taxYear: TH_2026_PARAMETERS.taxYear,
+		currency: TH_2026_PARAMETERS.currency,
+		grossIncome: thb(assessable.total, ThBracketField.GrossIncome),
+		taxableIncome: thb(allowancesRes.netTaxableIncome, ThBracketField.TaxableIncome),
+		totalTax: thb(totalTax, ThTaxField.TotalTax),
 		effectiveRate,
 		marginalRate: evalBrackets.brackets.marginalRate,
-		netTaxPayable: thb(netTaxPayable, "netTaxPayable", { allowNegative: true }),
+		netTaxPayable: thb(netTaxPayable, ThTaxField.NetTaxPayable, {
+			allowNegative: true,
+		}),
 		breakdown,
 	}
 }

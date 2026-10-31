@@ -1,7 +1,7 @@
 import type { ClampedAmount } from "../../core/caps"
 import { validateMonetaryAmount } from "../../core/money"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type { ThDonationsBreakdown } from "../types"
+import { ThAllowanceField, type ThDonationsBreakdown } from "../types"
 
 export interface ThDonationAllowancesResult {
 	readonly breakdown: ThDonationsBreakdown
@@ -26,7 +26,7 @@ export function calculateDonationAllowances(
 	const net = Math.max(0, netBeforeDonations)
 
 	const raw2x = donation2x ?? 0
-	validateMonetaryAmount(raw2x, "allowances.donation2x")
+	validateMonetaryAmount(raw2x, ThAllowanceField.Donation2x)
 	const eligible2x = raw2x * p.donation2xMultiplier
 	const cap2x = Math.floor(net * p.donation2xMaxRate)
 	const allowed2x = Math.min(eligible2x, cap2x)
@@ -39,7 +39,7 @@ export function calculateDonationAllowances(
 
 	const remainingNet = Math.max(0, net - allowed2x)
 	const raw1x = donation1x ?? 0
-	validateMonetaryAmount(raw1x, "allowances.donation1x")
+	validateMonetaryAmount(raw1x, ThAllowanceField.Donation1x)
 	const cap1x = Math.floor(remainingNet * p.donation1xMaxRate)
 	const allowed1x = Math.min(raw1x, cap1x)
 	const clamped1x: ClampedAmount = {

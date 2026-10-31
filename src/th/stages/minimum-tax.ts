@@ -1,6 +1,6 @@
 import { applyPercentage, fromMinorUnits, toMinorUnits } from "../../core/money"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type { ThMinimumGrossTaxBreakdown } from "../types"
+import { type ThMinimumGrossTaxBreakdown, ThTaxField } from "../types"
 
 /**
  * Calculates Section 48(2) Minimum Gross Tax on Section 40(2)–40(8) income.
@@ -26,9 +26,10 @@ export function calculateMinimumGrossTax(
 		}
 	}
 
-	const minorIncome = toMinorUnits(grossNonEmploymentIncome, "THB", "minimumGrossTax.gross")
+	const currency = TH_2026_PARAMETERS.currency
+	const minorIncome = toMinorUnits(grossNonEmploymentIncome, currency, ThTaxField.MinimumGrossTax)
 	const minorTax = applyPercentage(minorIncome, p.rate)
-	const calculatedTax = fromMinorUnits(minorTax, "THB")
+	const calculatedTax = fromMinorUnits(minorTax, currency)
 
 	const isApplicable = calculatedTax > p.taxThreshold
 	const wasApplied = isApplicable && calculatedTax > progressiveTax

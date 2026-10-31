@@ -1,12 +1,13 @@
 import { type ClampedAmount, clampCap } from "../../core/caps"
 import { validateMonetaryAmount } from "../../core/money"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type {
-	ThAllowancesInput,
-	ThChild,
-	ThChildrenInput,
-	ThFilingStatus,
-	ThParentsInput,
+import {
+	ThAllowanceField,
+	type ThAllowancesInput,
+	type ThChild,
+	type ThChildrenInput,
+	type ThFilingStatus,
+	type ThParentsInput,
 } from "../types"
 
 export interface ThFamilyAllowancesResult {
@@ -17,6 +18,13 @@ export interface ThFamilyAllowancesResult {
 	readonly disabled: ClampedAmount
 }
 
+const unclamped = (n: number): ClampedAmount => ({
+	requested: n,
+	allowed: n,
+	cap: n,
+	wasClamped: false,
+})
+
 function countBonusChildren(children: readonly ThChild[], cutoffYear: number): number {
 	let bonus = 0
 	for (let i = 1; i < children.length; i++) {
@@ -26,19 +34,16 @@ function countBonusChildren(children: readonly ThChild[], cutoffYear: number): n
 }
 
 function computeChildAllowance(children: ThAllowancesInput["children"]): ClampedAmount {
-	if (!children) return { requested: 0, allowed: 0, cap: 0, wasClamped: false }
+	if (!children) return unclamped(0)
 	const p = TH_2026_PARAMETERS.allowances.child
 	if (Array.isArray(children)) {
-		const total = children.length
 		const bonus = countBonusChildren(children, p.bonusCutoffYear)
-		const amount = total * p.basePerChild + bonus * p.bonusSecondPlusBorn2018OrLater
-		return { requested: amount, allowed: amount, cap: amount, wasClamped: false }
+		return unclamped(children.length * p.basePerChild + bonus * p.bonusSecondPlusBorn2018OrLater)
 	}
 	const counts = children as ThChildrenInput
-	const total = counts.totalCount ?? 0
+	const count = counts.totalCount ?? 0
 	const bonus = counts.secondPlusBorn2018OrLaterCount ?? 0
-	const amount = total * p.basePerChild + bonus * p.bonusSecondPlusBorn2018OrLater
-	return { requested: amount, allowed: amount, cap: amount, wasClamped: false }
+	return unclamped(count * p.basePerChild + bonus * p.bonusSecondPlusBorn2018OrLater)
 }
 
 function computeParentCount(
@@ -64,18 +69,13 @@ export function calculateFamilyAllowances(
 	filingStatus: ThFilingStatus = "single",
 ): ThFamilyAllowancesResult {
 	const p = TH_2026_PARAMETERS.allowances
-	const personal = {
-		requested: p.personal,
-		allowed: p.personal,
-		cap: p.personal,
-		wasClamped: false,
-	}
+	const personal = unclamped(p.personal)
 
 	const isSpouseEligible =
 		filingStatus === "married_no_income_spouse" || filingStatus === "married_joint"
 	const spouseRequested = input.spouse ?? (isSpouseEligible ? p.spouse : 0)
 	const spouse = isSpouseEligible
-		? clampCap(spouseRequested, p.spouse, "allowances.spouse")
+		? clampCap(spouseRequested, p.spouse, ThAllowanceField.Spouse)
 		: {
 				requested: spouseRequested,
 				allowed: 0,
@@ -89,17 +89,12 @@ export function calculateFamilyAllowances(
 	const parents = clampCap(
 		parentsRequested,
 		p.parent.perPerson * p.parent.maxCount,
-		"allowances.parents",
+		ThAllowanceField.Parents,
 	)
 
 	const disabledRequested = (input.disabledCareCount ?? 0) * p.disabledPerPerson
-	validateMonetaryAmount(disabledRequested, "allowances.disabled")
-	const disabled = {
-		requested: disabledRequested,
-		allowed: disabledRequested,
-		cap: disabledRequested,
-		wasClamped: false,
-	}
+	validateMonetaryAmount(disabledRequested, ThAllowanceField.Disabled)
+	const disabled = unclamped(disabledRequested)
 
 	return { personal, spouse, children, parents, disabled }
 }

@@ -1,6 +1,6 @@
 import { type ClampedAmount, clampCap } from "../../core/caps"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type { ThAllowancesInput, ThFilingStatus } from "../types"
+import { ThAllowanceField, type ThAllowancesInput, type ThFilingStatus } from "../types"
 
 export interface ThInsuranceAllowancesResult {
 	readonly socialSecurity: ClampedAmount
@@ -24,13 +24,13 @@ export function calculateInsuranceAllowances(
 	const socialSecurity = clampCap(
 		input.socialSecurity ?? 0,
 		p.socialSecurityFundCeiling,
-		"allowances.socialSecurity",
+		ThAllowanceField.SocialSecurity,
 	)
 
 	const healthClamped = clampCap(
 		input.healthInsurance ?? 0,
 		p.lifeInsurance.healthCeiling,
-		"allowances.healthInsurance",
+		ThAllowanceField.HealthInsurance,
 	)
 	const rawLife = input.lifeInsurance ?? 0
 	const lifeCombinedRequested = rawLife + (input.healthInsurance ?? 0)
@@ -38,7 +38,7 @@ export function calculateInsuranceAllowances(
 	const lifeCombined = clampCap(
 		lifeEffectiveRequested,
 		p.lifeInsurance.combinedCeiling,
-		"allowances.lifeInsurance",
+		ThAllowanceField.LifeHealthCombined,
 	)
 	const lifeInsurance: ClampedAmount = {
 		requested: lifeCombinedRequested,
@@ -50,13 +50,13 @@ export function calculateInsuranceAllowances(
 	const parentHealthInsurance = clampCap(
 		input.parentHealthInsurance ?? 0,
 		p.parentHealthInsuranceCeiling,
-		"allowances.parentHealthInsurance",
+		ThAllowanceField.ParentHealthInsurance,
 	)
 
 	const isSpouseEligible = filingStatus === "married_no_income_spouse"
 	const spouseLifeReq = input.spouseLifeInsurance ?? 0
 	const spouseLifeInsurance: ClampedAmount = isSpouseEligible
-		? clampCap(spouseLifeReq, p.spouseLifeInsuranceCeiling, "allowances.spouseLifeInsurance")
+		? clampCap(spouseLifeReq, p.spouseLifeInsuranceCeiling, ThAllowanceField.SpouseLifeInsurance)
 		: {
 				requested: spouseLifeReq,
 				allowed: 0,
@@ -67,7 +67,7 @@ export function calculateInsuranceAllowances(
 	const mortgageInterest = clampCap(
 		input.mortgageInterest ?? 0,
 		p.mortgageInterestCeiling,
-		"allowances.mortgageInterest",
+		ThAllowanceField.MortgageInterest,
 	)
 
 	return {

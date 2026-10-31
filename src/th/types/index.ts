@@ -13,6 +13,13 @@ export type {
 	ThMinimumGrossTaxBreakdown,
 	ThRetirementClusterBreakdown,
 } from "./breakdown"
+export {
+	ThAllowanceField,
+	ThAssessableField,
+	ThBracketField,
+	ThExpenseField,
+	ThTaxField,
+} from "./fields"
 export type { ThFilingStatus } from "./filing-status"
 export type {
 	ThAssessableIncomeInput,

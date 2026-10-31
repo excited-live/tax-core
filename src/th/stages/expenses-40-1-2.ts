@@ -1,5 +1,6 @@
 import { type ClampedAmount, clampCap } from "../../core/caps"
 import { TH_2026_PARAMETERS } from "../parameters"
+import { ThExpenseField } from "../types"
 
 /**
  * Calculates shared Section 40(1) and Section 40(2) expense deduction.
@@ -15,6 +16,6 @@ export function calculateExpenses40_1_2(s1: number, s2: number): ClampedAmount {
 	return clampCap(
 		requested,
 		TH_2026_PARAMETERS.expenses.section40_1_2.ceiling,
-		"expense.section40_1_2",
+		ThExpenseField.Section40_1_2,
 	)
 }

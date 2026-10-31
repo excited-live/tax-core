@@ -1,6 +1,6 @@
 import { type ClampedAmount, clampCap } from "../../core/caps"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type { ThExpenseElectableIncome, ThSection40_8Input } from "../types"
+import { type ThExpenseElectableIncome, ThExpenseField, type ThSection40_8Input } from "../types"
 import { calculateElectableItemExpense } from "./electable-expense"
 
 function calculateEntertainerExpense(
@@ -14,14 +14,14 @@ function calculateEntertainerExpense(
 		return { requested: 0, allowed: 0, cap: 0, wasClamped: false }
 	}
 	if (typeof item === "object" && item.expenseElection === "actual") {
-		return clampCap(item.actualExpense ?? 0, amount, "expense.40_8.entertainer")
+		return clampCap(item.actualExpense ?? 0, amount, ThExpenseField.Section40_8_Entertainer)
 	}
 	const p = TH_2026_PARAMETERS.expenses.section40_8
 	const tier1 = Math.min(amount, p.entertainerFirstTierThreshold)
 	const tier2 = Math.max(0, amount - p.entertainerFirstTierThreshold)
 	const computed =
 		Math.floor(tier1 * p.entertainerFirstTierRate) + Math.floor(tier2 * p.entertainerSecondTierRate)
-	return clampCap(computed, p.entertainerCeiling, "expense.40_8.entertainer")
+	return clampCap(computed, p.entertainerCeiling, ThExpenseField.Section40_8_Entertainer)
 }
 
 /**
@@ -42,13 +42,13 @@ export function calculateExpenses40_8(
 		return calculateElectableItemExpense(
 			input as number | ThExpenseElectableIncome,
 			TH_2026_PARAMETERS.expenses.section40_8.generalRate,
-			"expense.section40_8",
+			ThExpenseField.Section40_8_General,
 		)
 	}
 	const gen = calculateElectableItemExpense(
 		input.general,
 		TH_2026_PARAMETERS.expenses.section40_8.generalRate,
-		"expense.40_8.general",
+		ThExpenseField.Section40_8_General,
 	)
 	const ent = calculateEntertainerExpense(input.entertainer)
 	const requested = gen.requested + ent.requested

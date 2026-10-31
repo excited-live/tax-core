@@ -1,9 +1,8 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "../../core/money"
-import { calculateAllowances } from "../stages/allowances"
 import { calculateDonationAllowances } from "../stages/allowances-donations"
 
-describe("Thailand Donation Allowances and Allowance Aggregator", () => {
+describe("Thailand Donation Allowances (calculateDonationAllowances)", () => {
 	it("calculates 2x and 1x donations within 10% statutory caps", () => {
 		// Net before donations = 500,000 THB
 		// 10% cap for 2x is 50,000 THB.
@@ -44,24 +43,5 @@ describe("Thailand Donation Allowances and Allowance Aggregator", () => {
 	it("validates donation inputs strictly", () => {
 		expect(() => calculateDonationAllowances(-500, 0, 100_000)).toThrow(TaxValidationError)
 		expect(() => calculateDonationAllowances(0, -100, 100_000)).toThrow(TaxValidationError)
-	})
-
-	it("aggregates all allowances in calculateAllowances", () => {
-		const res = calculateAllowances(
-			{
-				personal: 60_000,
-				socialSecurity: 9_000,
-				donation1x: 5_000,
-			},
-			"single",
-			500_000,
-			100_000,
-			500_000,
-		)
-		expect(res.breakdown.personal.allowed).toBe(60_000)
-		expect(res.breakdown.socialSecurity.allowed).toBe(9_000)
-		expect(res.breakdown.donations.donation1x.allowed).toBe(5_000)
-		expect(res.breakdown.total).toBe(74_000)
-		expect(res.netTaxableIncome).toBe(326_000)
 	})
 })

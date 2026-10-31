@@ -1,6 +1,10 @@
 import { type ClampedAmount, clampCap } from "../../core/caps"
 import { TH_2026_PARAMETERS } from "../parameters"
-import type { ThAllowancesInput, ThRetirementClusterBreakdown } from "../types"
+import {
+	ThAllowanceField,
+	type ThAllowancesInput,
+	type ThRetirementClusterBreakdown,
+} from "../types"
 
 export interface ThRetirementAllowancesResult {
 	readonly retirementCluster: ThRetirementClusterBreakdown
@@ -25,24 +29,24 @@ export function calculateRetirementAllowances(
 	const rmf = clampCap(
 		input.rmf ?? 0,
 		{ base: assessableIncome, rate: p.rmf.maxRate, ceiling: p.rmf.ceiling },
-		"allowances.rmf",
+		ThAllowanceField.Rmf,
 	)
 	const ssf = clampCap(
 		input.ssf ?? 0,
 		{ base: assessableIncome, rate: p.ssf.maxRate, ceiling: p.ssf.ceiling },
-		"allowances.ssf",
+		ThAllowanceField.Ssf,
 	)
 	const pvd = clampCap(
 		input.pvd ?? 0,
 		{ base: wage, rate: p.pvd.maxRate, ceiling: p.pvd.ceiling },
-		"allowances.pvd",
+		ThAllowanceField.Pvd,
 	)
 	const gpf = clampCap(
 		input.gpf ?? 0,
 		{ base: wage, rate: p.gpf.maxRate, ceiling: p.gpf.ceiling },
-		"allowances.gpf",
+		ThAllowanceField.Gpf,
 	)
-	const nsf = clampCap(input.nsf ?? 0, p.nsf.ceiling, "allowances.nsf")
+	const nsf = clampCap(input.nsf ?? 0, p.nsf.ceiling, ThAllowanceField.Nsf)
 	const pensionLifeInsurance = clampCap(
 		input.pensionLifeInsurance ?? 0,
 		{
@@ -50,7 +54,7 @@ export function calculateRetirementAllowances(
 			rate: p.pensionLifeInsurance.maxRate,
 			ceiling: p.pensionLifeInsurance.ceiling,
 		},
-		"allowances.pensionLifeInsurance",
+		ThAllowanceField.PensionLife,
 	)
 
 	const individualSum =
@@ -60,7 +64,7 @@ export function calculateRetirementAllowances(
 		gpf.allowed +
 		nsf.allowed +
 		pensionLifeInsurance.allowed
-	const combined = clampCap(individualSum, p.combinedCeiling, "allowances.retirementCluster")
+	const combined = clampCap(individualSum, p.combinedCeiling, ThAllowanceField.RetirementCluster)
 
 	const retirementCluster: ThRetirementClusterBreakdown = {
 		rmf,
@@ -80,7 +84,7 @@ export function calculateRetirementAllowances(
 			rate: thaiEsgParam.maxRate,
 			ceiling: thaiEsgParam.ceiling,
 		},
-		"allowances.thaiEsg",
+		ThAllowanceField.ThaiEsg,
 	)
 
 	return {
