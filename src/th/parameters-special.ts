@@ -29,7 +29,9 @@ export const TH_2026_SEPARATE_SHEET: ThParameters["separateSheet"] = {
 }
 
 /**
- * Section 48(4) real estate transfer parameters for Tax Year 2026.
+ * Section 48(4) real estate transfer parameters for Tax Year 2026: the commercial holding-year
+ * expense table, the flat inheritance/gift rate, the 10-year holding cap, the annualised schedule
+ * (no 0% tier, per the Revenue Department's worked examples), and the 20% tax cap.
  *
  * @statute Thailand Revenue Code Section 48(4), Ministerial Regulation No. 126.
  */
@@ -44,5 +46,8 @@ export const TH_2026_REAL_ESTATE: ThParameters["realEstate"] = {
 		{ minYears: 7, rate: 0.55 },
 		{ minYears: 8, rate: 0.5 },
 	],
+	inheritanceExpenseRate: 0.5,
+	maxHoldingYears: 10,
+	brackets: TH_2026_SEPARATE_SHEET.brackets,
 	taxCapRate: 0.2,
 }

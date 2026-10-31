@@ -37,10 +37,25 @@ describe("Special regime resolution", () => {
 		expect(res.grossOutsideRegular).toBe(2_700_000)
 	})
 
-	it("folds an ineligible lump sum into Section 40(1) instead", () => {
+	it("folds only the non-exempt part of an ineligible severance into Section 40(1)", () => {
 		const res = resolveSpecialRegimes({
 			income: { section40_1: 50_000 },
 			separateSheet: { amount: 700_000, yearsOfService: 3, lastDailyWage: 1_500 },
+		})
+		// exemption min(700k, 400*1,500=600k, 600k) = 600,000 counts as gross outside the regular schedule
+		expect(res.regularIncome.section40_1).toBe(150_000)
+		expect(res.grossOutsideRegular).toBe(600_000)
+	})
+
+	it("folds an ineligible retirement payment into Section 40(1) in full", () => {
+		const res = resolveSpecialRegimes({
+			income: { section40_1: 50_000 },
+			separateSheet: {
+				amount: 700_000,
+				yearsOfService: 3,
+				lastDailyWage: 1_500,
+				paymentType: "retirement",
+			},
 		})
 		expect(res.regularIncome.section40_1).toBe(750_000)
 		expect(res.grossOutsideRegular).toBe(0)

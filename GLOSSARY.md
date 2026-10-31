@@ -51,7 +51,7 @@ The group of Thai long-term retirement allowances (RMF, SSF, PVD, GPF, National 
 _Avoid_: Investment deduction
 
 **Separate Sheet**:
-The optional Section 48(5) computation (`ใบแนบ ภ.ง.ด.90/91`) that taxes qualifying one-time severance and retirement lump sums (for 5+ years of service) independently from regular Assessable Income.
+The optional Section 48(5) computation (`ใบแนบ ภ.ง.ด.90/91`) that taxes one-time severance and retirement lump sums independently from regular Assessable Income. Labour-law severance (the default payment type) is first exempted up to the lesser of 400 days of last wage and 600,000 THB at any length of service; retirement payments get no exemption. With 5+ years of service the remainder takes 7,000 THB per year plus 50% expense and the schedule without a 0% tier; under 5 years only the non-exempt remainder joins Section 40(1).
 _Avoid_: Bonus calculation
 
 **Final Withholding Election**:
@@ -59,7 +59,7 @@ A taxpayer's statutory option under Section 40(4) or Section 48 to let source-wi
 _Avoid_: Tax exemption
 
 **Real Estate Transfer**:
-The Section 48(4) separate computation for inherited, gifted, or sold property: gross transfer value less a holding-year statutory expense (92% at 1 year down to 50% at 8+), averaged over the holding years, taxed on the regular brackets, multiplied back by the holding years, and clamped at 20% of the gross transfer value.
+The Section 48(4) separate computation for inherited, gifted, or sold property, applied to the official appraised value (ราคาประเมินทุนทรัพย์), not the sale price. Expense is a flat 50% for inheritance or gift, or the holding-year table for commercial acquisitions (92% at 1 year down to 50% at 8+), never both. Holding years above 10 count as 10. The net gain is averaged over the holding years, taxed on the schedule without a 0% tier (5% from the first baht), multiplied back by the holding years, and clamped at 20% of the gross transfer value.
 _Avoid_: Capital gains tax
 
 **Dividend Tax Credit**:

@@ -1,10 +1,11 @@
-import type {
-	ThAssessableIncomeInput,
-	ThDividendTaxCreditBreakdown,
-	ThFinalWithholdingBreakdown,
-	ThRealEstateBreakdown,
-	ThSeparateSheetBreakdown,
-	ThTaxInput,
+import {
+	type ThAssessableIncomeInput,
+	ThBracketField,
+	type ThDividendTaxCreditBreakdown,
+	type ThFinalWithholdingBreakdown,
+	type ThRealEstateBreakdown,
+	type ThSeparateSheetBreakdown,
+	type ThTaxInput,
 } from "../types"
 import { sumThAmounts } from "../units"
 import { calculateDividendTaxCredit } from "./dividend-credit"
@@ -30,8 +31,8 @@ export interface ThSpecialRegimes {
  * and the Section 48(4) real estate transfer, then assembles the remaining regular income.
  *
  * Math: Regular Section 40(4) = included sources + dividend gross-up; ineligible lump sum joins
- * Section 40(1). Gross outside the regular schedule = final-elected 40(4) + eligible lump sum
- * + real estate gross transfer value.
+ * Section 40(1). Gross outside the regular schedule = final-elected 40(4) + eligible lump sum (or, if
+ * ineligible, its severance exemption) + real estate gross transfer value.
  * Units: THB major units; sums performed in integer satang.
  * Throws: TaxValidationError for any invalid special-regime input.
  *
@@ -51,11 +52,14 @@ export function resolveSpecialRegimes(input: ThTaxInput): ThSpecialRegimes {
 			section40_4: section40_4.includedAmount,
 			dividendCredit: dividendTaxCredit.credit,
 		}),
-		grossOutsideRegular: sumThAmounts([
-			section40_4.finalWithholding.totalAmount,
-			separateSheet.isEligible ? separateSheet.amount : 0,
-			realEstate.grossTransferValue,
-		]),
+		grossOutsideRegular: sumThAmounts(
+			[
+				section40_4.finalWithholding.totalAmount,
+				separateSheet.isEligible ? separateSheet.amount : separateSheet.exemption,
+				realEstate.grossTransferValue,
+			],
+			ThBracketField.GrossIncome,
+		),
 		finalWithholding: section40_4.finalWithholding,
 		dividendTaxCredit,
 		separateSheet,

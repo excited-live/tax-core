@@ -119,6 +119,12 @@ export interface ThParameters {
 			/** Expense deduction rate (ratio). */
 			readonly rate: number
 		}[]
+		/** Flat expense rate for inherited or gifted property (ratio); replaces the table. */
+		readonly inheritanceExpenseRate: number
+		/** Holding years above this count as this many (statute: more than 10 years counts as 10). */
+		readonly maxHoldingYears: number
+		/** Annualised schedule: the Section 48(5) ladder without a 0% tier (THB bounds, ratios). */
+		readonly brackets: readonly TaxBracket[]
 		/** Cap on tax as a share of gross transfer value (ratio). */
 		readonly taxCapRate: number
 	}

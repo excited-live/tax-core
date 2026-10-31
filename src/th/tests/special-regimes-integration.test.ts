@@ -7,7 +7,7 @@ const refund = { allowNegative: true }
 const salary = { section40_1: 600_000 }
 const ss = { socialSecurity: 9_000 } // salary-only regular tax = 20,600
 const sheet = { amount: 1_500_000, yearsOfService: 20, lastDailyWage: 2_000 } // tax 23,000
-const estate = { grossTransferValue: 5_000_000, holdingYears: 3 } // tax 47,500
+const estate = { grossTransferValue: 5_000_000, holdingYears: 3 } // tax 70,000
 
 describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => {
 	it("keeps final-elected interest out of the brackets (15% withheld at source)", () => {
@@ -79,11 +79,16 @@ describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => 
 		expect(res.marginalRate).toBe(0.1)
 	})
 
-	it("treats under 5 years of service as regular Section 40(1) income", () => {
+	it("treats an under-5-year retirement payment as regular Section 40(1) income", () => {
 		// 1,000,000 salary: 840,000 taxable -> 7,500 + 20,000 + 37,500 + 18,000 = 83,000
 		const res = calculateThTax({
 			income: salary,
-			separateSheet: { amount: 400_000, yearsOfService: 4, lastDailyWage: 2_000 },
+			separateSheet: {
+				amount: 400_000,
+				yearsOfService: 4,
+				lastDailyWage: 2_000,
+				paymentType: "retirement",
+			},
 		})
 		expect(res.breakdown.separateSheet.isEligible).toBe(false)
 		expect(res.breakdown.separateSheet.addedToSection40_1).toBe(400_000)
@@ -93,14 +98,29 @@ describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => 
 		expect(res.totalTax).toBe(thb(83_000))
 	})
 
+	it("exempts under-5-year severance first and taxes only the remainder as 40(1)", () => {
+		// 800,000 severance, wage 1,000: exempt 400,000; remainder 400,000 joins 600,000 salary
+		const res = calculateThTax({
+			income: salary,
+			separateSheet: { amount: 800_000, yearsOfService: 4, lastDailyWage: 1_000 },
+		})
+		expect(res.breakdown.separateSheet.exemption).toBe(400_000)
+		expect(res.breakdown.separateSheet.addedToSection40_1).toBe(400_000)
+		expect(res.breakdown.assessableIncome.section40_1).toBe(1_000_000)
+		expect(res.grossIncome).toBe(thb(1_400_000))
+		expect(res.totalTax).toBe(thb(83_000))
+	})
+
 	it("switches to the separate sheet at exactly 5 years of service", () => {
-		const input = { amount: 400_000, lastDailyWage: 2_000 }
+		// wage cap 400 * 1,000 = 400,000 exempts half of the 800,000 severance either way
+		const input = { amount: 800_000, lastDailyWage: 1_000 }
 		const four = calculateThTax({ separateSheet: { ...input, yearsOfService: 4 } })
 		const five = calculateThTax({ separateSheet: { ...input, yearsOfService: 5 } })
 		expect(four.breakdown.separateSheet.isEligible).toBe(false)
 		expect(five.breakdown.separateSheet.isEligible).toBe(true)
-		expect(five.totalTax).toBe(thb(0))
-		// 400,000 - 100,000 expense - 60,000 personal = 240,000 -> 7,500 + 0.1 * ... = 4,500
+		// five: remainder 400,000 - 35,000 fixed = 365,000; 50% -> net 182,500; tax 9,125
+		expect(five.totalTax).toBe(thb(9_125))
+		// four: 400,000 - 100,000 expense - 60,000 personal = 240,000 -> 4,500
 		expect(four.totalTax).toBe(thb(4_500))
 		expect(four.breakdown.assessableIncome.section40_1).toBe(400_000)
 		expect(five.breakdown.assessableIncome.section40_1).toBe(0)
@@ -108,16 +128,29 @@ describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => 
 
 	it("taxes a real estate transfer separately from the regular schedule", () => {
 		const res = calculateThTax({ realEstateTransfer: estate })
-		expect(res.breakdown.realEstate.tax).toBe(47_500)
-		expect(res.totalTax).toBe(thb(47_500))
+		expect(res.breakdown.realEstate.tax).toBe(70_000)
+		expect(res.totalTax).toBe(thb(70_000))
 		expect(res.grossIncome).toBe(thb(5_000_000))
-		expect(res.netTaxPayable).toBe(thb(47_500))
+		expect(res.netTaxPayable).toBe(thb(70_000))
+	})
+
+	it("taxes the Revenue Department inheritance example end to end", () => {
+		// 2,000,000 appraised value, 5 years, 50% expense: 5 x 5% x 200,000 = 50,000
+		const res = calculateThTax({
+			realEstateTransfer: {
+				grossTransferValue: 2_000_000,
+				holdingYears: 5,
+				acquisitionType: "inheritance_or_gift",
+			},
+		})
+		expect(res.breakdown.realEstate.effectiveHoldingYears).toBe(5)
+		expect(res.totalTax).toBe(thb(50_000))
 	})
 
 	it("combines every regime into one audited liability", () => {
 		// regular: 600k + 80k + 20k credit - 100k - 69k = 531,000 -> 32,150
-		// total = 32,150 + 23,000 + 47,500 + 15,000 = 117,650
-		// net = total - 15,000 final - 20,000 credit - 5,000 withheld = 77,650
+		// total = 32,150 + 23,000 + 70,000 + 15,000 = 140,150
+		// net = total - 15,000 final - 20,000 credit - 5,000 withheld = 100,150
 		const res = calculateThTax({
 			income: {
 				...salary,
@@ -134,13 +167,13 @@ describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => 
 		const b = res.breakdown
 		expect(b.regularTax).toBe(32_150)
 		expect(b.separateSheet.tax).toBe(23_000)
-		expect(b.realEstate.tax).toBe(47_500)
+		expect(b.realEstate.tax).toBe(70_000)
 		expect(b.finalWithholding.totalTax).toBe(15_000)
 		expect(b.dividendTaxCredit.credit).toBe(20_000)
-		expect(b.totalCombinedTax).toBe(117_650)
-		expect(res.totalTax).toBe(thb(117_650))
-		expect(res.netTaxPayable).toBe(thb(77_650))
-		expect(b.netTaxPayable).toBe(77_650)
+		expect(b.totalCombinedTax).toBe(140_150)
+		expect(res.totalTax).toBe(thb(140_150))
+		expect(res.netTaxPayable).toBe(thb(100_150))
+		expect(b.netTaxPayable).toBe(100_150)
 		expect(res.grossIncome).toBe(thb(7_300_000))
 		expect(res.taxableIncome).toBe(thb(531_000))
 	})
@@ -186,6 +219,9 @@ describe("Thailand special regimes: Section 40(4), 47 bis, 48(4), 48(5)", () => 
 			{ separateSheet: { ...sheet, yearsOfService: 2.5 } },
 			{ separateSheet: { ...sheet, amount: -1 } },
 			{ realEstateTransfer: { ...estate, holdingYears: 0 } },
+			{ realEstateTransfer: { ...estate, acquisitionType: "sale" as "commercial" } },
+			{ separateSheet: { ...sheet, paymentType: "bonus" as "severance" } },
+			{ income: { section40_4: { interest: { amount: 1, election: "none" as "final" } } } },
 			{ realEstateTransfer: { ...estate, grossTransferValue: Number.NaN } },
 		]
 		for (const input of bad) {

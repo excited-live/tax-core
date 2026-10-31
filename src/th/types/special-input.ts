@@ -56,6 +56,23 @@ export interface ThSection40_4Input {
 }
 
 /**
+ * Kind of Section 48(5) lump sum. Only labour-law `"severance"` carries the 400-day / 600,000 THB
+ * exemption; other `"retirement"` payments (e.g. a pension fund lump sum) get none.
+ * Plain `"severance"`/`"retirement"` strings are accepted wherever
+ * {@link ThSeparateSheetPaymentType} is expected.
+ *
+ * @statute Thailand Revenue Code Section 48(5); Section 42(1) (severance exemption).
+ */
+export const ThSeparateSheetPaymentType = {
+	Severance: "severance",
+	Retirement: "retirement",
+} as const
+
+/** Union of {@link ThSeparateSheetPaymentType} values. */
+export type ThSeparateSheetPaymentType =
+	(typeof ThSeparateSheetPaymentType)[keyof typeof ThSeparateSheetPaymentType]
+
+/**
  * Section 48(5) one-time severance or retirement lump sum.
  * Units: THB major units; `yearsOfService` is a count.
  *
@@ -64,11 +81,44 @@ export interface ThSection40_4Input {
 export interface ThSeparateSheetInput {
 	/** Lump sum received, in THB. */
 	readonly amount: number
-	/** Completed years of service (non-negative safe integer). */
+	/** Completed years of service (non-negative safe integer; callers round part-years up). */
 	readonly yearsOfService: number
 	/** Last daily wage in THB, basis for the 400-day exemption. */
 	readonly lastDailyWage: number
+	/** Defaults to `"severance"`; `"retirement"` payments receive no exemption. */
+	readonly paymentType?: ThSeparateSheetPaymentType
 }
+
+/**
+ * How a Section 48(4) property was acquired. Inherited or gifted property takes a flat 50%
+ * expense; commercially acquired (or other) property takes the holding-year table. The two are
+ * never combined. Plain `"commercial"`/`"inheritance_or_gift"` strings are accepted wherever
+ * {@link ThRealEstateAcquisitionType} is expected.
+ *
+ * @statute Thailand Revenue Code Section 48(4); Ministerial Regulation No. 126.
+ */
+export const ThRealEstateAcquisitionType = {
+	Commercial: "commercial",
+	InheritanceOrGift: "inheritance_or_gift",
+} as const
+
+/** Union of {@link ThRealEstateAcquisitionType} values. */
+export type ThRealEstateAcquisitionType =
+	(typeof ThRealEstateAcquisitionType)[keyof typeof ThRealEstateAcquisitionType]
+
+/**
+ * Which expense deduction a Section 48(4) computation used, reported in the breakdown.
+ *
+ * @statute Thailand Revenue Code Section 48(4); Ministerial Regulation No. 126.
+ */
+export const ThRealEstateExpenseBasis = {
+	HoldingPeriodTable: "holding_period_table",
+	FlatInheritance: "flat_inheritance",
+} as const
+
+/** Union of {@link ThRealEstateExpenseBasis} values. */
+export type ThRealEstateExpenseBasis =
+	(typeof ThRealEstateExpenseBasis)[keyof typeof ThRealEstateExpenseBasis]
 
 /**
  * Section 48(4) real estate transfer subject to separate computation.
@@ -77,8 +127,16 @@ export interface ThSeparateSheetInput {
  * @statute Thailand Revenue Code Section 48(4).
  */
 export interface ThRealEstateTransferInput {
-	/** Gross transfer value in THB. */
+	/**
+	 * Official appraised value in THB (ราคาประเมินทุนทรัพย์, Section 49 bis), not the actual sale
+	 * price.
+	 */
 	readonly grossTransferValue: number
-	/** Whole years the property was held (positive safe integer). */
+	/**
+	 * Years the property was held (positive safe integer). Callers round part-years up; the
+	 * calculation counts at most 10 years.
+	 */
 	readonly holdingYears: number
+	/** Defaults to `"commercial"`; `"inheritance_or_gift"` uses a flat 50% expense. */
+	readonly acquisitionType?: ThRealEstateAcquisitionType
 }

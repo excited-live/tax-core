@@ -1,5 +1,10 @@
 import type { BracketEvaluationResult } from "../../core/brackets"
-import type { ThFinalWithholdingElection } from "./special-input"
+import type {
+	ThFinalWithholdingElection,
+	ThRealEstateAcquisitionType,
+	ThRealEstateExpenseBasis,
+	ThSeparateSheetPaymentType,
+} from "./special-input"
 
 /**
  * Final withholding detail for one Section 40(4) source. Units: THB major units; `rate` is a ratio.
@@ -55,13 +60,16 @@ export interface ThSeparateSheetBreakdown {
 	readonly amount: number
 	readonly yearsOfService: number
 	readonly lastDailyWage: number
-	/** True when `yearsOfService` meets the statutory minimum. */
+	/** True when `yearsOfService` meets the statutory minimum for the separate sheet. */
 	readonly isEligible: boolean
-	/** Lump sum folded into Section 40(1) when ineligible; zero otherwise. */
+	/** Lump sum remaining after the exemption, folded into Section 40(1) when ineligible. */
 	readonly addedToSection40_1: number
-	/** `lastDailyWage * 400` (zero when ineligible). */
+	/** `lastDailyWage * 400` (zero for retirement payments). */
 	readonly wageBasedCap: number
 	readonly exemptionCeiling: number
+	/** `"retirement"` payments receive no exemption. */
+	readonly paymentType: ThSeparateSheetPaymentType
+	/** Applied to severance at any length of service; zero for retirement payments. */
 	readonly exemption: number
 	readonly remainder: number
 	readonly fixedExpense: number
@@ -75,25 +83,32 @@ export interface ThSeparateSheetBreakdown {
  * Section 48(4) real estate transfer audit trail. Units: THB major units.
  *
  * Tax is computed exactly as `years * bracketTax(netGain / years)` by evaluating `netGain`
- * against the regular brackets with every bound multiplied by `holdingYears`, so `brackets`
- * slices carry those scaled bounds. `annualGain` and `annualTax` are the per-year figures
- * rounded to the satang for display only; `taxBeforeCap` is the exact figure and may differ
- * from `annualTax * holdingYears` by under one satang per year.
+ * against the schedule without a 0% tier with every bound multiplied by `effectiveHoldingYears`,
+ * so `brackets` slices carry those scaled bounds. `annualGain` and `annualTax` are the per-year
+ * figures rounded to the satang for display only; `taxBeforeCap` is the exact figure and may
+ * differ from `annualTax * effectiveHoldingYears` by under one satang per year.
  *
  * @statute Thailand Revenue Code Section 48(4), Section 42(5).
  */
 export interface ThRealEstateBreakdown {
+	/** Official appraised value (ราคาประเมินทุนทรัพย์) supplied by the caller. */
 	readonly grossTransferValue: number
-	readonly holdingYears: number
-	/** Statutory expense deduction rate (ratio) for the holding period. */
+	readonly acquisitionType: ThRealEstateAcquisitionType
+	/** Which expense applied: flat inheritance/gift rate or the holding-year table. */
+	readonly expenseBasis: ThRealEstateExpenseBasis
+	/** Holding years as supplied by the caller. */
+	readonly requestedHoldingYears: number
+	/** Holding years used in the calculation: `requestedHoldingYears` capped at 10. */
+	readonly effectiveHoldingYears: number
+	/** Statutory expense deduction rate (ratio) for the acquisition type and holding period. */
 	readonly expenseRate: number
 	readonly expense: number
 	readonly netGain: number
-	/** `netGain / holdingYears`, rounded half-up to the satang (display only). */
+	/** `netGain / effectiveHoldingYears`, rounded half-up to the satang (display only). */
 	readonly annualGain: number
-	/** Brackets applied to `netGain` with bounds scaled by `holdingYears`. */
+	/** Brackets applied to `netGain` with bounds scaled by `effectiveHoldingYears`. */
 	readonly brackets: BracketEvaluationResult
-	/** `taxBeforeCap / holdingYears`, rounded half-up to the satang (display only). */
+	/** `taxBeforeCap / effectiveHoldingYears`, rounded half-up to the satang (display only). */
 	readonly annualTax: number
 	readonly taxBeforeCap: number
 	/** Cap on tax: the statutory share of `grossTransferValue`. */

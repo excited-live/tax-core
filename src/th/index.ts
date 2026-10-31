@@ -33,4 +33,9 @@ export type {
 	ThSeparateSheetInput,
 	ThTaxInput,
 } from "./types"
-export { ThFinalWithholdingElection } from "./types"
+export {
+	ThFinalWithholdingElection,
+	ThRealEstateAcquisitionType,
+	ThRealEstateExpenseBasis,
+	ThSeparateSheetPaymentType,
+} from "./types"
