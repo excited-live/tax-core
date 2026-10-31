@@ -1,13 +1,19 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
 	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-	"files": { "includes": ["**", "!**/dist", "!**/coverage", "!**/*.md", "!**/skills-lock.json"] },
+	"files": {
+		"includes": ["**", "!**/dist", "!**/coverage", "!**/*.md", "!**/skills-lock.json"]
+	},
 	"formatter": { "indentStyle": "tab", "lineWidth": 100 },
 	"javascript": { "formatter": { "semicolons": "asNeeded", "quoteStyle": "double" } },
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"complexity": {
+				"noExcessiveCognitiveComplexity": {
+					"level": "error",
+					"options": { "maxAllowedComplexity": 10 }
+				},
 				"useLiteralKeys": "off"
 			},
 			"correctness": {
@@ -15,6 +21,10 @@
 				"noUnusedVariables": "error"
 			},
 			"style": {
+				"noExcessiveLinesPerFile": {
+					"level": "error",
+					"options": { "maxLines": 100, "skipBlankLines": true }
+				},
 				"noNonNullAssertion": "off",
 				"useImportType": "error",
 				"useExportType": "error"

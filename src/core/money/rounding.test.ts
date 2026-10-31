@@ -1,0 +1,26 @@
+import { describe, expect, it } from "bun:test"
+import { TaxValidationError } from "./errors"
+import { applyPercentage, roundHalfUp } from "./rounding"
+
+describe("Rounding & percentage application", () => {
+	it("performs half-away-from-zero rounding on numbers", () => {
+		expect(roundHalfUp(1.4)).toBe(1)
+		expect(roundHalfUp(1.5)).toBe(2)
+		expect(roundHalfUp(2.5)).toBe(3)
+		expect(roundHalfUp(-1.5)).toBe(-2)
+	})
+
+	it("applies statutory percentage in minor units with various rounding modes", () => {
+		expect(applyPercentage(10_000, 0.05)).toBe(500)
+		expect(applyPercentage(1000, 0.33333)).toBe(333)
+		expect(applyPercentage(100, 0.025, "floor")).toBe(2)
+		expect(applyPercentage(100, 0.025, "ceil")).toBe(3)
+		expect(applyPercentage(100, 0.025, "half-up")).toBe(3)
+	})
+
+	it("rejects non-integer minor units or invalid rate in applyPercentage", () => {
+		expect(() => applyPercentage(10.5, 0.05)).toThrow(TaxValidationError)
+		expect(() => applyPercentage(10_000, 1.5)).toThrow(TaxValidationError)
+		expect(() => applyPercentage(10_000, -0.05)).toThrow(TaxValidationError)
+	})
+})
