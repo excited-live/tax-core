@@ -1,3 +1,4 @@
+import { TaxValidationError } from "./errors"
 import { type ValidateAmountOptions, validateIntegerMinorUnits, validateRate } from "./validate"
 
 /**
@@ -72,4 +73,28 @@ export function applyPercentage(
 	}
 
 	return Number(result) + 0
+}
+
+/**
+ * Applies the statutory gross-up ratio `rate / (1 - rate)` to an integer minor unit amount.
+ *
+ * Math: Exact BigInt rational `(minorUnits * num) / (den - num)` where `rate = num / den`,
+ * rounded half-up (away from zero) so ties such as 0.5 satang never suffer binary float drift.
+ * Units: Input and output are integer minor units (satang/cents).
+ *
+ * @param minorUnits Non-negative integer minor units amount (the net amount).
+ * @param rate Underlying rate ratio in [0, 1) (e.g. 0.2 for a 20% corporate tax rate).
+ * @returns Gross-up amount (`minorUnits * rate / (1 - rate)`) in integer minor units.
+ * @throws {TaxValidationError} if minorUnits is not a non-negative safe integer or rate is outside [0, 1).
+ * @example applyGrossUp(100_000, 0.2) // 25_000 (1,000.00 -> 250.00 credit at 20%)
+ */
+export function applyGrossUp(minorUnits: number, rate: number): number {
+	validateIntegerMinorUnits(minorUnits, "minorUnits")
+	validateRate(rate, "rate")
+	if (rate >= 1) {
+		throw new TaxValidationError("rate", rate, "Gross-up rate must be strictly less than 1")
+	}
+	const { num, den } = parseRateRational(rate)
+	const divisor = den - num
+	return Number((BigInt(minorUnits) * num * 2n + divisor) / (divisor * 2n)) + 0
 }

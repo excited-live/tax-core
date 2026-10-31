@@ -70,3 +70,20 @@ export function validateIntegerMinorUnits(
 		throw new TaxValidationError(field, minorUnits, "Minor units amount must be a safe integer")
 	}
 }
+
+/**
+ * Validates a statutory count (children, years of service, holding years).
+ *
+ * @param value Count to validate.
+ * @param field Diagnostic field name.
+ * @param min Inclusive lower bound (defaults to 0).
+ * @throws {TaxValidationError} if value is not a safe integer greater than or equal to min.
+ */
+export function validateSafeIntegerCount(value: number, field: string, min = 0): void {
+	if (!Number.isSafeInteger(value)) {
+		throw new TaxValidationError(field, value, "Count must be a safe integer")
+	}
+	if (value < min) {
+		throw new TaxValidationError(field, value, `Count must be at least ${min}`)
+	}
+}

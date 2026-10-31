@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "./errors"
-import { validateIntegerMinorUnits, validateMonetaryAmount, validateRate } from "./validate"
+import {
+	validateIntegerMinorUnits,
+	validateMonetaryAmount,
+	validateRate,
+	validateSafeIntegerCount,
+} from "./validate"
 
 describe("Boundary validation and TaxValidationError", () => {
 	it("throws TaxValidationError on NaN and Infinity", () => {
@@ -24,5 +29,15 @@ describe("Boundary validation and TaxValidationError", () => {
 		expect(() => validateRate(0.15, "rate")).not.toThrow()
 		expect(() => validateIntegerMinorUnits(1.5, "units")).toThrow(TaxValidationError)
 		expect(() => validateIntegerMinorUnits(150, "units")).not.toThrow()
+	})
+
+	it("validates counts as safe integers at or above a minimum", () => {
+		expect(() => validateSafeIntegerCount(0, "years")).not.toThrow()
+		expect(() => validateSafeIntegerCount(5, "years", 1)).not.toThrow()
+		expect(() => validateSafeIntegerCount(-1, "years")).toThrow(TaxValidationError)
+		expect(() => validateSafeIntegerCount(0, "years", 1)).toThrow(TaxValidationError)
+		expect(() => validateSafeIntegerCount(2.5, "years")).toThrow(TaxValidationError)
+		expect(() => validateSafeIntegerCount(2 ** 53, "years")).toThrow(TaxValidationError)
+		expect(() => validateSafeIntegerCount(Number.NaN, "years")).toThrow(TaxValidationError)
 	})
 })

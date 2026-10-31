@@ -7,16 +7,18 @@ import {
 } from "./currency"
 import { TaxValidationError } from "./errors"
 import { fromMinorUnits, toMinorUnits } from "./minor-units"
-import { applyPercentage, type RoundingMode, roundHalfUp } from "./rounding"
+import { applyGrossUp, applyPercentage, type RoundingMode, roundHalfUp } from "./rounding"
 import { type Money, money, thb, usd } from "./types"
 import {
 	type ValidateAmountOptions,
 	validateIntegerMinorUnits,
 	validateMonetaryAmount,
 	validateRate,
+	validateSafeIntegerCount,
 } from "./validate"
 
 export {
+	applyGrossUp,
 	applyPercentage,
 	CURRENCIES,
 	type CurrencyCode,
@@ -36,4 +38,5 @@ export {
 	validateIntegerMinorUnits,
 	validateMonetaryAmount,
 	validateRate,
+	validateSafeIntegerCount,
 }

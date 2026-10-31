@@ -58,6 +58,10 @@ _Avoid_: Bonus calculation
 A taxpayer's statutory option under Section 40(4) or Section 48 to let source-withheld tax on interest, dividends, or property transfers stand as final rather than including the income in regular progressive brackets.
 _Avoid_: Tax exemption
 
+**Real Estate Transfer**:
+The Section 48(4) separate computation for inherited, gifted, or sold property: gross transfer value less a holding-year statutory expense (92% at 1 year down to 50% at 8+), averaged over the holding years, taxed on the regular brackets, multiplied back by the holding years, and clamped at 20% of the gross transfer value.
+_Avoid_: Capital gains tax
+
 **Minimum Gross Tax**:
 The alternative tax computation mandated by Section 48(2) of the Thailand Revenue Code imposing a 0.5% tax on non-employment income (Sections 40(2)–40(8)) if it exceeds 120,000 THB and computed gross tax exceeds 5,000 THB, payable if higher than progressive tax.
 _Avoid_: Flat tax, alternative minimum tax

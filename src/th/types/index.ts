@@ -30,3 +30,20 @@ export type {
 	ThSection40_8Input,
 } from "./income"
 export type { ThTaxInput } from "./input"
+export type {
+	ThCombinedTaxBreakdown,
+	ThDividendTaxCreditBreakdown,
+	ThFinalWithholdingBreakdown,
+	ThFinalWithholdingSourceBreakdown,
+	ThRealEstateBreakdown,
+	ThSeparateSheetBreakdown,
+} from "./special-breakdown"
+export { ThSpecialRegimeField } from "./special-fields"
+export type {
+	ThFinalWithholdingElection,
+	ThRealEstateTransferInput,
+	ThSection40_4Dividend,
+	ThSection40_4Input,
+	ThSection40_4Source,
+	ThSeparateSheetInput,
+} from "./special-input"

@@ -1,9 +1,14 @@
+import {
+	TH_2026_FINAL_WITHHOLDING,
+	TH_2026_REAL_ESTATE,
+	TH_2026_SEPARATE_SHEET,
+} from "./parameters-special"
 import type { ThParameters } from "./parameters-types"
 
 /**
  * Thailand Statutory Tax Parameters for Tax Year 2026 (Revenue Code ภ.ง.ด.90/91).
  *
- * @statute Thailand Revenue Code Sections 40, 42 bis, 47, 48(1)–(2); Royal Decrees No. 11, 650.
+ * @statute Thailand Revenue Code Sections 40, 42 bis, 47, 47 bis, 48(1)–(5); Royal Decrees No. 11, 650.
  */
 export const TH_2026_PARAMETERS: ThParameters = {
 	taxYear: 2026,
@@ -84,4 +89,7 @@ export const TH_2026_PARAMETERS: ThParameters = {
 		incomeThreshold: 60_000,
 		taxThreshold: 5_000,
 	},
+	finalWithholding: TH_2026_FINAL_WITHHOLDING,
+	separateSheet: TH_2026_SEPARATE_SHEET,
+	realEstate: TH_2026_REAL_ESTATE,
 }

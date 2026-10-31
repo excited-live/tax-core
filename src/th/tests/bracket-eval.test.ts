@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
-import { evaluateThBrackets } from "../stages/bracket-eval"
+import { TH_2026_PARAMETERS } from "../parameters"
+import { evaluateThBracketSet, evaluateThBrackets } from "../stages/bracket-eval"
 
 describe("Thailand Progressive Bracket Evaluator (evaluateThBrackets)", () => {
 	it("computes progressive tax for taxable income spanning multiple tiers", () => {
@@ -19,5 +20,13 @@ describe("Thailand Progressive Bracket Evaluator (evaluateThBrackets)", () => {
 		const res = evaluateThBrackets(120_000, 200_000)
 		expect(res.totalTax).toBe(0)
 		expect(res.brackets.slices[0]?.tax).toBe(0)
+	})
+
+	it("evaluates an arbitrary bracket schedule such as the Section 48(5) separate sheet", () => {
+		// 350,000 on the separate schedule: 300,000 @ 5% = 15,000 + 50,000 @ 10% = 5,000
+		const res = evaluateThBracketSet(350_000, 350_000, TH_2026_PARAMETERS.separateSheet.brackets)
+		expect(res.totalTax).toBe(20_000)
+		expect(res.brackets.slices.length).toBe(7)
+		expect(res.brackets.marginalRate).toBe(0.1)
 	})
 })

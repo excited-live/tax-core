@@ -5,8 +5,10 @@ import { ThBracketField, type ThBreakdown, ThTaxField, type ThTaxInput } from ".
 import { calculateAllowances } from "./allowances"
 import { calculateAssessableIncome } from "./assessable"
 import { evaluateThBrackets } from "./bracket-eval"
+import { combineThLiability, sumThAmounts } from "./combine"
 import { calculateExpenseDeductions } from "./expenses"
 import { calculateMinimumGrossTax } from "./minimum-tax"
+import { resolveSpecialRegimes } from "./special-regimes"
 
 function validateYear(year?: number): void {
 	if (year !== undefined && year !== TH_2026_PARAMETERS.taxYear) {
@@ -21,7 +23,7 @@ function validateYear(year?: number): void {
 /**
  * Executes full Thailand PIT calculation pipeline for ภ.ง.ด.90/91.
  *
- * @statute Thailand Revenue Code Sections 40, 42 bis, 47, 48(1)–(2).
+ * @statute Thailand Revenue Code Sections 40, 42 bis, 47, 47 bis, 48(1)–(5).
  */
 export function runThTaxPipeline(input: ThTaxInput = {}): TaxResult<"THB", ThBreakdown> {
 	validateYear(input.taxYear)
@@ -29,8 +31,11 @@ export function runThTaxPipeline(input: ThTaxInput = {}): TaxResult<"THB", ThBre
 	const withholding = input.withholdingTax ?? 0
 	validateMonetaryAmount(withholding, ThTaxField.WithholdingTax)
 
-	const assessable = calculateAssessableIncome(input.income)
-	const expenses = calculateExpenseDeductions(input.income, assessable)
+	const special = resolveSpecialRegimes(input)
+	const income = special.regularIncome
+
+	const assessable = calculateAssessableIncome(income)
+	const expenses = calculateExpenseDeductions(income, assessable)
 	const netIncomeAfterExpenses = Math.max(0, assessable.total - expenses.total)
 
 	const allowancesRes = calculateAllowances(
@@ -49,9 +54,17 @@ export function runThTaxPipeline(input: ThTaxInput = {}): TaxResult<"THB", ThBre
 		progressiveTax,
 	)
 
-	const totalTax = minimumGrossTax.wasApplied ? minimumGrossTax.calculatedTax : progressiveTax
-	const netTaxPayable = totalTax - withholding
-	const effectiveRate = assessable.total > 0 ? totalTax / assessable.total : 0
+	const regularTax = minimumGrossTax.wasApplied ? minimumGrossTax.calculatedTax : progressiveTax
+	const combined = combineThLiability({
+		regularTax,
+		separateSheetTax: special.separateSheet.tax,
+		realEstateTax: special.realEstate.tax,
+		finalWithholdingTax: special.finalWithholding.totalTax,
+		dividendTaxCredit: special.dividendTaxCredit.credit,
+		withholdingTax: withholding,
+	})
+	const grossIncome = sumThAmounts([assessable.total, special.grossOutsideRegular])
+	const effectiveRate = grossIncome > 0 ? combined.totalCombinedTax / grossIncome : 0
 
 	const breakdown: ThBreakdown = {
 		assessableIncome: assessable,
@@ -63,19 +76,25 @@ export function runThTaxPipeline(input: ThTaxInput = {}): TaxResult<"THB", ThBre
 		progressiveBrackets: evalBrackets.brackets,
 		minimumGrossTax,
 		withholdingTax: withholding,
-		netTaxPayable,
+		netTaxPayable: combined.netTaxPayable,
+		regularTax,
+		separateSheet: special.separateSheet,
+		realEstate: special.realEstate,
+		finalWithholding: special.finalWithholding,
+		dividendTaxCredit: special.dividendTaxCredit,
+		totalCombinedTax: combined.totalCombinedTax,
 	}
 
 	return {
 		jurisdiction: "TH",
 		taxYear: TH_2026_PARAMETERS.taxYear,
 		currency: TH_2026_PARAMETERS.currency,
-		grossIncome: thb(assessable.total, ThBracketField.GrossIncome),
+		grossIncome: thb(grossIncome, ThBracketField.GrossIncome),
 		taxableIncome: thb(allowancesRes.netTaxableIncome, ThBracketField.TaxableIncome),
-		totalTax: thb(totalTax, ThTaxField.TotalTax),
+		totalTax: thb(combined.totalCombinedTax, ThTaxField.TotalTax),
 		effectiveRate,
 		marginalRate: evalBrackets.brackets.marginalRate,
-		netTaxPayable: thb(netTaxPayable, ThTaxField.NetTaxPayable, {
+		netTaxPayable: thb(combined.netTaxPayable, ThTaxField.NetTaxPayable, {
 			allowNegative: true,
 		}),
 		breakdown,

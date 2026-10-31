@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { TaxValidationError } from "./errors"
-import { applyPercentage, roundHalfUp } from "./rounding"
+import { applyGrossUp, applyPercentage, roundHalfUp } from "./rounding"
 
 describe("Rounding & percentage application", () => {
 	it("performs half-away-from-zero rounding on numbers", () => {
@@ -37,5 +37,26 @@ describe("Rounding & percentage application", () => {
 		expect(() => applyPercentage(10.5, 0.05)).toThrow(TaxValidationError)
 		expect(() => applyPercentage(10_000, 1.5)).toThrow(TaxValidationError)
 		expect(() => applyPercentage(10_000, -0.05)).toThrow(TaxValidationError)
+	})
+
+	it("applies the gross-up ratio rate / (1 - rate) with exact half-up rounding", () => {
+		// 20% -> 0.25 ratio: 1,000.00 THB => 250.00 THB
+		expect(applyGrossUp(100_000, 0.2)).toBe(25_000)
+		// exact tie: 2 satang * 0.25 = 0.5 -> rounds half up to 1
+		expect(applyGrossUp(2, 0.2)).toBe(1)
+		// 30% -> 3/7: 700 * 3/7 = 300
+		expect(applyGrossUp(700, 0.3)).toBe(300)
+		// 10 * 0.3/0.7 = 4.2857 -> 4
+		expect(applyGrossUp(10, 0.3)).toBe(4)
+		expect(applyGrossUp(12_345, 0)).toBe(0)
+		// rates above 50% produce ratios above 1
+		expect(applyGrossUp(100, 0.75)).toBe(300)
+	})
+
+	it("rejects gross-up rates outside [0, 1) and non-integer minor units", () => {
+		expect(() => applyGrossUp(100, 1)).toThrow(TaxValidationError)
+		expect(() => applyGrossUp(100, -0.1)).toThrow(TaxValidationError)
+		expect(() => applyGrossUp(100, Number.NaN)).toThrow(TaxValidationError)
+		expect(() => applyGrossUp(1.5, 0.2)).toThrow(TaxValidationError)
 	})
 })

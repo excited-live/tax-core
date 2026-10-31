@@ -73,4 +73,22 @@ export interface ThParameters {
 		readonly incomeThreshold: number
 		readonly taxThreshold: number
 	}
+	readonly finalWithholding: {
+		readonly interestRate: number
+		readonly dividendRate: number
+		readonly digitalAssetRate: number
+	}
+	readonly separateSheet: {
+		readonly minYearsOfService: number
+		readonly exemptionWageDays: number
+		readonly exemptionCeiling: number
+		readonly expensePerYearOfService: number
+		readonly remainderExpenseRate: number
+		readonly brackets: readonly TaxBracket[]
+	}
+	readonly realEstate: {
+		/** Expense rate by holding years; the last row with `minYears <= holdingYears` applies. */
+		readonly expenseTable: readonly { readonly minYears: number; readonly rate: number }[]
+		readonly taxCapRate: number
+	}
 }
