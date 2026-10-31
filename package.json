@@ -40,7 +40,9 @@
 		"lint": "biome ci --error-on-warnings .",
 		"format": "biome check --write .",
 		"check": "bun run lint && bun run typecheck && bun test && bun run build && bun run lint:package",
-		"lint:package": "publint --strict && attw --pack . --profile node16"
+		"lint:package": "publint --strict && attw --pack . --profile node16",
+		"skills:check": "bunx skills@latest check",
+		"skills:update": "bunx skills@latest update"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",

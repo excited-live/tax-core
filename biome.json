@@ -1,7 +1,7 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
 	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-	"files": { "includes": ["**", "!**/dist", "!**/coverage", "!**/*.md"] },
+	"files": { "includes": ["**", "!**/dist", "!**/coverage", "!**/*.md", "!**/skills-lock.json"] },
 	"formatter": { "indentStyle": "tab", "lineWidth": 100 },
 	"javascript": { "formatter": { "semicolons": "asNeeded", "quoteStyle": "double" } },
 	"linter": {
