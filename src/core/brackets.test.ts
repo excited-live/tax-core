@@ -56,6 +56,13 @@ describe("Progressive bracket evaluator (evaluateBrackets)", () => {
 		expect(result.slices[3]?.tax).toBe(0)
 	})
 
+	it("computes effective rate based on grossIncome when provided", () => {
+		// Taxable income 200,000, but grossIncome 500,000
+		const result = evaluateBrackets(200_000, sampleBrackets, 500_000)
+		expect(result.totalTax).toBe(2500)
+		expect(result.effectiveRate).toBeCloseTo(2500 / 500_000, 6)
+	})
+
 	it("evaluates income in top unbounded bracket", () => {
 		// 600,000 income:
 		// [0, 150k] @ 0% = 0
@@ -86,11 +93,14 @@ describe("Progressive bracket evaluator (evaluateBrackets)", () => {
 		expect(zeroResult.marginalRate).toBe(0.0)
 	})
 
-	it("validates taxable amount boundary conditions", () => {
+	it("validates taxable amount and bracket boundary conditions", () => {
 		expect(() => evaluateBrackets(Number.NaN, sampleBrackets)).toThrow(TaxValidationError)
 		expect(() => evaluateBrackets(Number.POSITIVE_INFINITY, sampleBrackets)).toThrow(
 			TaxValidationError,
 		)
 		expect(() => evaluateBrackets(-1000, sampleBrackets)).toThrow(TaxValidationError)
+		expect(() => evaluateBrackets(100_000, [{ upTo: 100_000, rate: -0.05 }])).toThrow(
+			TaxValidationError,
+		)
 	})
 })

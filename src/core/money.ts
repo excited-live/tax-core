@@ -28,18 +28,6 @@ export type Money<C extends CurrencyCode = CurrencyCode> = number & {
 	readonly __currencyBrand?: C
 }
 
-export function money<C extends CurrencyCode>(amount: number, _currency?: C): Money<C> {
-	return amount as Money<C>
-}
-
-export function thb(amount: number): Money<"THB"> {
-	return amount as Money<"THB">
-}
-
-export function usd(amount: number): Money<"USD"> {
-	return amount as Money<"USD">
-}
-
 export class TaxValidationError extends Error {
 	readonly field: string
 	readonly value: unknown
@@ -75,7 +63,29 @@ export function validateMonetaryAmount(
 	}
 }
 
+export function money<C extends CurrencyCode>(
+	amount: number,
+	_currency?: C,
+	field = "amount",
+): Money<C> {
+	validateMonetaryAmount(amount, field)
+	return amount as Money<C>
+}
+
+export function thb(amount: number, field = "amount"): Money<"THB"> {
+	validateMonetaryAmount(amount, field)
+	return amount as Money<"THB">
+}
+
+export function usd(amount: number, field = "amount"): Money<"USD"> {
+	validateMonetaryAmount(amount, field)
+	return amount as Money<"USD">
+}
+
 export function roundHalfUp(value: number): number {
+	if (value < 0) {
+		return -Math.round(Math.abs(value))
+	}
 	return Math.round(value)
 }
 
@@ -85,17 +95,25 @@ export function toMinorUnits(amount: number, currency: CurrencyCode, field = "am
 	if (precision === 0) {
 		return Math.round(amount)
 	}
-	const factor = 10 ** precision
-	return Math.round(amount * factor)
+	const sign = amount < 0 ? -1 : 1
+	const absAmount = Math.abs(amount)
+	return sign * Math.round(Number(`${absAmount}e${precision}`))
 }
 
-export function fromMinorUnits(minorUnits: number, currency: CurrencyCode): number {
+export function fromMinorUnits(
+	minorUnits: number,
+	currency: CurrencyCode,
+	field = "minorUnits",
+): number {
+	validateMonetaryAmount(minorUnits, field, { allowNegative: true })
 	const precision = getCurrencyPrecision(currency)
 	if (precision === 0) {
 		return minorUnits
 	}
 	const factor = 10 ** precision
-	return Number((minorUnits / factor).toFixed(precision))
+	const sign = minorUnits < 0 ? -1 : 1
+	const absUnits = Math.abs(minorUnits)
+	return sign * Number((absUnits / factor).toFixed(precision))
 }
 
 export type RoundingMode = "half-up" | "floor" | "ceil"
@@ -105,6 +123,9 @@ export function applyPercentage(
 	rate: number,
 	rounding: RoundingMode = "half-up",
 ): number {
+	validateMonetaryAmount(minorUnits, "minorUnits")
+	validateMonetaryAmount(rate, "rate")
+
 	const raw = minorUnits * rate
 	if (rounding === "floor") {
 		return Math.floor(raw)

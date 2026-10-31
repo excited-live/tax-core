@@ -42,6 +42,12 @@ describe("Branded Money constructors", () => {
 		expect(price).toBe(49.99)
 		expect(yen).toBe(10_000)
 	})
+
+	it("validates inputs in branded money helpers", () => {
+		expect(() => thb(Number.NaN)).toThrow(TaxValidationError)
+		expect(() => usd(-10)).toThrow(TaxValidationError)
+		expect(() => money(Number.POSITIVE_INFINITY, "JPY")).toThrow(TaxValidationError)
+	})
 })
 
 describe("Minor Unit conversions without floating-point drift", () => {
@@ -50,6 +56,8 @@ describe("Minor Unit conversions without floating-point drift", () => {
 		expect(toMinorUnits(1.14, "USD")).toBe(114)
 		// 0.07 * 100 in native IEEE 754 float evaluates to 7.000000000000001
 		expect(toMinorUnits(0.07, "USD")).toBe(7)
+		// 1.005 * 100 in native float is 100.49999999999999
+		expect(toMinorUnits(1.005, "USD")).toBe(101)
 		// Standard Thai Baht to Satang
 		expect(toMinorUnits(10.55, "THB")).toBe(1055)
 		expect(toMinorUnits(thb(100_000.5), "THB")).toBe(10_000_050)
@@ -83,7 +91,7 @@ describe("Rounding & percentage application", () => {
 		expect(roundHalfUp(1.4)).toBe(1)
 		expect(roundHalfUp(1.5)).toBe(2)
 		expect(roundHalfUp(2.5)).toBe(3)
-		expect(roundHalfUp(-1.5)).toBe(-1)
+		expect(roundHalfUp(-1.5)).toBe(-2)
 	})
 
 	it("applies statutory percentage in minor units with various rounding modes", () => {

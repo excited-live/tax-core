@@ -8,6 +8,7 @@ export {
 export {
 	type ClampedAmount,
 	clampCap,
+	type StatutoryCapOptions,
 } from "./core/caps"
 export {
 	applyPercentage,

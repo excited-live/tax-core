@@ -24,17 +24,28 @@ export interface BracketEvaluationResult {
 export function evaluateBrackets(
 	taxableAmount: number,
 	brackets: readonly TaxBracket[],
+	grossIncome?: number,
 	field = "taxableAmount",
 ): BracketEvaluationResult {
 	validateMonetaryAmount(taxableAmount, field)
+	if (grossIncome !== undefined) {
+		validateMonetaryAmount(grossIncome, "grossIncome")
+	}
 
 	let totalTax = 0
 	let lowerBound = 0
 	const slices: BracketSlice[] = []
+	const nextUnit = taxableAmount + 1
+	let marginalRate = brackets[0]?.rate ?? 0
 
 	for (let i = 0; i < brackets.length; i++) {
 		const bracket = brackets[i]
 		if (!bracket) continue
+
+		validateMonetaryAmount(bracket.rate, `bracket[${i}].rate`)
+		if (bracket.upTo !== null) {
+			validateMonetaryAmount(bracket.upTo, `bracket[${i}].upTo`)
+		}
 
 		const upperBound = bracket.upTo
 		let sliceTaxable = 0
@@ -59,35 +70,22 @@ export function evaluateBrackets(
 			tax: sliceTax,
 		})
 
+		// Track marginal rate on next unit of ordinary income in the same traversal
+		if (
+			nextUnit > lowerBound &&
+			(upperBound === null || !Number.isFinite(upperBound) || nextUnit <= upperBound)
+		) {
+			marginalRate = bracket.rate
+		}
+
 		if (upperBound === null || !Number.isFinite(upperBound)) {
 			break
 		}
 		lowerBound = upperBound
 	}
 
-	const nextUnit = taxableAmount + 1
-	let marginalRate = 0
-	if (brackets.length > 0) {
-		const lastBracket = brackets[brackets.length - 1]
-		marginalRate = lastBracket ? lastBracket.rate : 0
-
-		let currentLower = 0
-		for (const bracket of brackets) {
-			const currentUpper = bracket.upTo
-			if (
-				nextUnit > currentLower &&
-				(currentUpper === null || !Number.isFinite(currentUpper) || nextUnit <= currentUpper)
-			) {
-				marginalRate = bracket.rate
-				break
-			}
-			if (currentUpper !== null && Number.isFinite(currentUpper)) {
-				currentLower = currentUpper
-			}
-		}
-	}
-
-	const effectiveRate = taxableAmount > 0 ? totalTax / taxableAmount : 0
+	const baseForEffectiveRate = grossIncome !== undefined ? grossIncome : taxableAmount
+	const effectiveRate = baseForEffectiveRate > 0 ? totalTax / baseForEffectiveRate : 0
 
 	return {
 		totalTax,
