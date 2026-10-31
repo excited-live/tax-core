@@ -73,4 +73,59 @@ export interface ThParameters {
 		readonly incomeThreshold: number
 		readonly taxThreshold: number
 	}
+	/**
+	 * Section 40(4) final withholding rates (ratios).
+	 *
+	 * @statute Thailand Revenue Code Sections 40(4), 50(2)(g), 57 ter.
+	 */
+	readonly finalWithholding: {
+		/** Bank interest rate (ratio). */
+		readonly interestRate: number
+		/** Dividend rate (ratio). */
+		readonly dividendRate: number
+		/** Digital asset income rate (ratio); an assumption mirroring interest. */
+		readonly digitalAssetRate: number
+	}
+	/**
+	 * Section 48(5) separate sheet for severance/retirement lump sums. Money in THB major units,
+	 * rates as ratios.
+	 *
+	 * @statute Thailand Revenue Code Section 48(5), Section 42(1).
+	 */
+	readonly separateSheet: {
+		/** Minimum completed years of service for eligibility (count). */
+		readonly minYearsOfService: number
+		/** Multiplier of the last daily wage for the exemption (days). */
+		readonly exemptionWageDays: number
+		/** Absolute exemption ceiling (THB). */
+		readonly exemptionCeiling: number
+		/** Fixed expense per year of service (THB). */
+		readonly expensePerYearOfService: number
+		/** Expense rate on the remainder after the fixed expense (ratio). */
+		readonly remainderExpenseRate: number
+		/** Separate progressive schedule (THB bounds, ratio rates). */
+		readonly brackets: readonly TaxBracket[]
+	}
+	/**
+	 * Section 48(4) real estate transfer parameters.
+	 *
+	 * @statute Thailand Revenue Code Section 48(4), Ministerial Regulation No. 126.
+	 */
+	readonly realEstate: {
+		/** Expense rate by holding years; the last row with `minYears <= holdingYears` applies. */
+		readonly expenseTable: readonly {
+			/** Minimum whole holding years for the row (count). */
+			readonly minYears: number
+			/** Expense deduction rate (ratio). */
+			readonly rate: number
+		}[]
+		/** Flat expense rate for inherited or gifted property (ratio); replaces the table. */
+		readonly inheritanceExpenseRate: number
+		/** Holding years above this count as this many (statute: more than 10 years counts as 10). */
+		readonly maxHoldingYears: number
+		/** Annualised schedule: the Section 48(5) ladder without a 0% tier (THB bounds, ratios). */
+		readonly brackets: readonly TaxBracket[]
+		/** Cap on tax as a share of gross transfer value (ratio). */
+		readonly taxCapRate: number
+	}
 }

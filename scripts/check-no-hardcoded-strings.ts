@@ -21,10 +21,16 @@ const FORBIDDEN_PATTERNS: Array<{ regex: RegExp; description: string }> = [
 		description: "Hardcoded 'THB' in minor units call (use TH_2026_PARAMETERS.currency)",
 	},
 	{
+		regex: /"(?:final|include)"/,
+		description: "Hardcoded election literal (use ThFinalWithholdingElection instead)",
+	},
+	{
 		regex: /toMinorUnits\([^,\n]+,\s*[^,\n]+,\s*"(?:taxableIncome|grossIncome)"\)/,
 		description: "Hardcoded bracket field string (use ThBracketField enum)",
 	},
 ]
+
+const COMMENT_LINE = /^\s*(?:\/\/|\/?\*)/
 
 let hasErrors = false
 
@@ -37,6 +43,7 @@ for (const dir of STAGES_DIRS) {
 
 		for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
 			const line = lines[lineIndex] ?? ""
+			if (COMMENT_LINE.test(line)) continue
 			for (const pattern of FORBIDDEN_PATTERNS) {
 				if (pattern.regex.test(line)) {
 					console.error(

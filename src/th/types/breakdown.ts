@@ -1,5 +1,11 @@
 import type { BracketEvaluationResult } from "../../core/brackets"
 import type { ClampedAmount } from "../../core/caps"
+import type {
+	ThDividendTaxCreditBreakdown,
+	ThFinalWithholdingBreakdown,
+	ThRealEstateBreakdown,
+	ThSeparateSheetBreakdown,
+} from "./special-breakdown"
 
 export interface ThAssessableIncomeBreakdown {
 	readonly section40_1: number
@@ -78,4 +84,11 @@ export interface ThBreakdown {
 	readonly minimumGrossTax: ThMinimumGrossTaxBreakdown
 	readonly withholdingTax: number
 	readonly netTaxPayable: number
+	/** Regular-schedule tax: max(progressive, minimum gross tax). */
+	readonly regularTax: number
+	readonly separateSheet: ThSeparateSheetBreakdown
+	readonly realEstate: ThRealEstateBreakdown
+	readonly finalWithholding: ThFinalWithholdingBreakdown
+	readonly dividendTaxCredit: ThDividendTaxCreditBreakdown
+	readonly totalCombinedTax: number
 }

@@ -2,12 +2,22 @@ import { describe, expect, it } from "bun:test"
 import { calculateMinimumGrossTax } from "../stages/minimum-tax"
 
 describe("Section 48(2) Minimum Gross Tax", () => {
-	it("returns non-applicable when eligible gross income is under 60,000 THB", () => {
+	it("returns non-applicable when eligible gross income is under 120,000 THB", () => {
 		const res = calculateMinimumGrossTax(50_000, 1_000)
 		expect(res.grossEligibleIncome).toBe(50_000)
 		expect(res.calculatedTax).toBe(0)
 		expect(res.isApplicable).toBe(false)
 		expect(res.wasApplied).toBe(false)
+	})
+
+	it("starts at exactly 120,000 THB, not 60,000 THB", () => {
+		// Sections 48(2): 40(2)-(8) income must reach 120,000; 0.5% of that is only 600.
+		for (const gross of [60_000, 100_000, 119_999.99]) {
+			expect(calculateMinimumGrossTax(gross, 0).calculatedTax).toBe(0)
+		}
+		const atThreshold = calculateMinimumGrossTax(120_000, 0)
+		expect(atThreshold.calculatedTax).toBe(600)
+		expect(atThreshold.isApplicable).toBe(false)
 	})
 
 	it("waives tax when calculated minimum gross tax is 5,000 THB or less", () => {

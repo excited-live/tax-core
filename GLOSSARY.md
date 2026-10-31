@@ -51,23 +51,23 @@ The group of Thai long-term retirement allowances (RMF, SSF, PVD, GPF, National 
 _Avoid_: Investment deduction
 
 **Separate Sheet**:
-The optional Section 48(5) computation (`ใบแนบ ภ.ง.ด.90/91`) that taxes qualifying one-time severance and retirement lump sums (for 5+ years of service) independently from regular Assessable Income.
+The optional Section 48(5) computation (`ใบแนบ ภ.ง.ด.90/91`) that taxes one-time severance and retirement lump sums independently from regular Assessable Income. Labour-law severance (the default payment type) is first exempted up to the lesser of 400 days of last wage and 600,000 THB at any length of service; retirement payments get no exemption. With 5+ years of service the remainder takes 7,000 THB per year plus 50% expense and the schedule without a 0% tier; under 5 years only the non-exempt remainder joins Section 40(1).
 _Avoid_: Bonus calculation
 
 **Final Withholding Election**:
 A taxpayer's statutory option under Section 40(4) or Section 48 to let source-withheld tax on interest, dividends, or property transfers stand as final rather than including the income in regular progressive brackets.
 _Avoid_: Tax exemption
 
-**Minimum Gross Tax**:
-The alternative tax computation mandated by Section 48(2) of the Thailand Revenue Code imposing a 0.5% tax on non-employment income (Sections 40(2)–40(8)) if it exceeds 120,000 THB and computed gross tax exceeds 5,000 THB, payable if higher than progressive tax.
-_Avoid_: Flat tax, alternative minimum tax
+**Real Estate Transfer**:
+The Section 48(4) separate computation for inherited, gifted, or sold property, applied to the official appraised value (ราคาประเมินทุนทรัพย์), not the sale price. Expense is a flat 50% for inheritance or gift, or the holding-year table for commercial acquisitions (92% at 1 year down to 50% at 8+), never both. Holding years above 10 count as 10. The net gain is averaged over the holding years, taxed on the schedule without a 0% tier (5% from the first baht), multiplied back by the holding years, and clamped at 20% of the gross transfer value.
+_Avoid_: Capital gains tax
 
 **Dividend Tax Credit**:
-The Section 47 bis gross-up and tax credit granted when a taxpayer elects to include dividends from Thai corporate entities in regular progressive calculation to recover underlying corporate income tax.
+The Section 47 bis gross-up and tax credit granted when a taxpayer elects to include dividends from Thai corporate entities in regular progressive calculation to recover underlying corporate income tax. The grossed-up amount (dividend + credit) stays in Section 40(4) assessable income and the credit offsets tax payable.
 _Avoid_: Dividend deduction
 
 **Minimum Gross Tax**:
-The Section 48(2) alternative calculation equal to 0.5% of gross Assessable Income under Sections 40(2)–40(8) when such income is at least 60,000 THB, payable only if it exceeds 5,000 THB and exceeds progressive bracket tax.
+The Section 48(2) alternative calculation equal to 0.5% of gross Assessable Income under Sections 40(2)–40(8) when such income is at least 120,000 THB, payable only if it exceeds 5,000 THB and exceeds progressive bracket tax.
 _Avoid_: Alternative minimum tax
 
 ## United States (`US`)

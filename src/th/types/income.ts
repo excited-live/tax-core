@@ -3,6 +3,8 @@
  */
 export type ThExpenseElection = "standard" | "actual"
 
+import type { ThSection40_4Input } from "./special-input"
+
 /**
  * Income item that supports standard vs actual expense election.
  */
@@ -55,7 +57,7 @@ export interface ThAssessableIncomeInput {
 	/** Section 40(3) - Royalties / Goodwill / Copyright. */
 	readonly section40_3?: number | ThExpenseElectableIncome
 	/** Section 40(4) - Interest / Dividends / Digital assets. */
-	readonly section40_4?: number | { readonly amount: number }
+	readonly section40_4?: number | ThSection40_4Input
 	/** Section 40(5) - Rental income across asset types. */
 	readonly section40_5?: ThSection40_5Input
 	/** Section 40(6) - Liberal professions (medical, legal, accounting, etc.). */
