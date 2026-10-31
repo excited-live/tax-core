@@ -17,6 +17,10 @@ describe("Minor Unit conversions without floating-point drift", () => {
 		expect(Number.isNaN(toMinorUnits(1e-7, "THB"))).toBe(false)
 	})
 
+	it("throws TaxValidationError when conversion exceeds safe integer bounds", () => {
+		expect(() => toMinorUnits(1e16, "THB")).toThrow(TaxValidationError)
+	})
+
 	it("converts 0-decimal and 3-decimal currencies correctly", () => {
 		expect(toMinorUnits(100, "JPY")).toBe(100)
 		expect(toMinorUnits(2500, "JPY")).toBe(2500)

@@ -18,6 +18,7 @@ describe("Boundary validation and TaxValidationError", () => {
 	})
 
 	it("validates rate ratio and safe integers", () => {
+		expect(() => validateRate(Number.NaN, "rate")).toThrow(TaxValidationError)
 		expect(() => validateRate(1.2, "rate")).toThrow(TaxValidationError)
 		expect(() => validateRate(-0.1, "rate")).toThrow(TaxValidationError)
 		expect(() => validateRate(0.15, "rate")).not.toThrow()

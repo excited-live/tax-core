@@ -18,5 +18,11 @@ describe("Marginal Rate evaluator (marginalRateAt)", () => {
 		expect(marginalRateAt(sampleBrackets, 150_001)).toBe(0.05)
 		expect(marginalRateAt(sampleBrackets, 300_001)).toBe(0.1)
 		expect(marginalRateAt(sampleBrackets, 500_001)).toBe(0.15)
+		expect(marginalRateAt(sampleBrackets, 1_000_000)).toBe(0.15)
+	})
+
+	it("handles empty brackets and zero/negative nextUnit boundaries", () => {
+		expect(marginalRateAt([], 100)).toBe(0)
+		expect(marginalRateAt(sampleBrackets, 0)).toBe(0.0)
 	})
 })

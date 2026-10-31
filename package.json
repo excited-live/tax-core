@@ -55,7 +55,7 @@
 	},
 	"scripts": {
 		"build": "tsdown",
-		"test": "bun test",
+		"test": "bun test --coverage",
 		"typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
 		"lint": "biome ci --error-on-warnings .",
 		"format": "biome check --write .",
